@@ -1,3 +1,63 @@
-🧼 Universo da Limpeza — Ecossistema Integrado de Gestão, ERP, BI & Automação IAPlataforma completa e unificada desenvolvida para a operação ponta a ponta da Universo da Limpeza, integrando E-commerce B2C/B2B, Controle de Caixa, ERP com Leitor de Código de Barras, Business Intelligence (BI) e Automação Omnichannel com Inteligência Artificial (ManyChat) em um único ecossistema protegido por controle de acesso.🚀 Arquitetura do Ecossistema (4 Módulos Interligados)MóduloArquivoDescrição e Funcionalidades Principais1. Loja Oficial & Gestão de Caixaindex.htmlVitrine digital responsiva para clientes, carrinho de compras, cupons promocionais, checkout via WhatsApp e Painel Administrativo com fechamento de caixa diário/semanal, sangrias, PDV balcão e trilha de auditoria.2. UniGestão ERP & PDVerp.htmlControle operacional de estoque em tempo real com leitor de código de barras (ex.: código 00104 + Enter), registro de entradas/saídas, frente de caixa (PDV) com cálculo automático de troco e alertas de reposição mínima.3. Looker Studio BI & Logísticabi.htmlDashboard executivo interativo com KPIs de faturamento, ranking de produtos mais vendidos, previsão inteligente de reposição e simulador logístico de rotas e custos de entrega.4. ManyChat IA & CRMmanychat.htmlCentral de automação omnichannel (WhatsApp Business & Instagram Direct), construtor visual de fluxos e gatilhos, CRM de leads qualificados, janela oficial Meta de 24h e Agente IA Consultivo integrado ao catálogo.Banco de Dados Relacionalbanco.sqlScript SQL completo (MySQL / MariaDB) com modelagem normalizada de usuários, permissões, produtos, pedidos, movimentações financeiras e logs de auditoria.🔐 Segurança & Controle de Acesso (RBAC)O ecossistema conta com uma camada de segurança baseada em perfil de usuário (Role-Based Access Control) sincronizada entre todos os módulos:Perfil Cliente / Visitante:Acesso exclusivo à loja virtual (index.html) para navegação no catálogo e realização de pedidos.A barra superior do ecossistema e os botões administrativos permanecem totalmente ocultos.Proteção contra acesso direto por URL (Security Gate): qualquer tentativa de abrir erp.html, bi.html ou manychat.html sem sessão administrativa ativa bloqueia automaticamente a interface e exige autenticação.Perfil Administrador:Ao autenticar-se como administrador, a Barra Global do Ecossistema é desbloqueada no topo de todas as telas, permitindo alternar instantaneamente entre a Loja, o ERP, o BI e o ManyChat.🧪 Credenciais de Teste (Demonstração)Para testar o desbloqueio completo do ecossistema administrativo na versão publicada no GitHub Pages:E-mail Admin: admin@universolimpeza.com.br (ou clique no acesso rápido Admin Joana na tela de login)Senha: admin123Dica de teste: Após entrar como Administrador, utilize a barra superior para navegar entre os 4 sistemas e clique em 🔒 Sair Admin para validar o bloqueio imediato das rotas internas.🌐 Como Executar Localmente ou no GitHub PagesGitHub Pages: Basta ativar o GitHub Pages na branch main (pasta /root) nas configurações do repositório e acessar a URL gerada.Execução Local: Clone este repositório e abra o arquivo index.html diretamente em qualquer navegador moderno (não requer instalação de dependências ou servidor backend para demonstração).git clone https://github.com/seu-usuario/universo-da-limpeza.git
+# 🧼 Universo da Limpeza — Ecossistema Integrado de Gestão, ERP, BI & Automação IA
+
+![Status](https://img.shields.io/badge/Status-Online%20%7C%20GitHub%20Pages-00A896?style=for-the-badge)
+![Arquitetura](https://img.shields.io/badge/Arquitetura-Multi--M%C3%B3dulo%20RBAC-0F4C81?style=for-the-badge)
+![Stack](https://img.shields.io/badge/Stack-HTML5%20%7C%20CSS3%20%7C%20JavaScript%20%7C%20SQL-F59E0B?style=for-the-badge)
+
+Plataforma completa e unificada desenvolvida para a operação ponta a ponta da **Universo da Limpeza**, integrando **E-commerce B2C/B2B**, **Controle de Caixa**, **ERP com Leitor de Código de Barras**, **Business Intelligence (BI)** e **Automação Omnichannel com Inteligência Artificial (ManyChat)** em um único ecossistema protegido por controle de acesso.
+
+---
+
+## 🚀 Arquitetura do Ecossistema (4 Módulos Interligados)
+
+| Módulo | Arquivo | Descrição e Funcionalidades Principais |
+| :--- | :--- | :--- |
+| **1. Loja Oficial & Gestão de Caixa** | `index.html` | Vitrine digital responsiva para clientes, carrinho de compras, cupons promocionais, checkout via WhatsApp e **Painel Administrativo** com fechamento de caixa diário/semanal, sangrias, PDV balcão e trilha de auditoria. |
+| **2. UniGestão ERP & PDV** | `erp.html` | Controle operacional de estoque em tempo real com **leitor de código de barras** (ex.: código `00104` + `Enter`), registro de entradas/saídas, frente de caixa (PDV) com cálculo automático de troco e alertas de reposição mínima. |
+| **3. Looker Studio BI & Logística** | `bi.html` | Dashboard executivo interativo com KPIs de faturamento, ranking de produtos mais vendidos, previsão inteligente de reposição e **simulador logístico de rotas e custos de entrega**. |
+| **4. ManyChat IA & CRM** | `manychat.html` | Central de automação omnichannel (WhatsApp Business & Instagram Direct), construtor visual de fluxos e gatilhos, CRM de leads qualificados, janela oficial Meta de 24h e **Agente IA Consultivo** integrado ao catálogo. |
+| **Banco de Dados Relacional** | `banco.sql` | Script SQL completo (`MySQL` / `MariaDB`) com modelagem normalizada de usuários, permissões, produtos, pedidos, movimentações financeiras e logs de auditoria. |
+
+---
+
+## 🔐 Segurança & Controle de Acesso (RBAC)
+
+O ecossistema conta com uma camada de segurança baseada em perfil de usuário (**Role-Based Access Control**) sincronizada entre todos os módulos:
+
+* **Perfil Cliente / Visitante:**
+  * Acesso exclusivo à loja virtual (`index.html`) para navegação no catálogo e realização de pedidos.
+  * A barra superior do ecossistema e os botões administrativos permanecem **totalmente ocultos**.
+  * **Proteção contra acesso direto por URL (*Security Gate*):** qualquer tentativa de abrir `erp.html`, `bi.html` ou `manychat.html` sem sessão administrativa ativa bloqueia automaticamente a interface e exige autenticação.
+* **Perfil Administrador:**
+  * Ao autenticar-se como administrador, a **Barra Global do Ecossistema** é desbloqueada no topo de todas as telas, permitindo alternar instantaneamente entre a Loja, o ERP, o BI e o ManyChat.
+
+---
+
+## 🧪 Credenciais de Teste (Demonstração)
+
+Para testar o desbloqueio completo do ecossistema administrativo na versão publicada no GitHub Pages:
+
+* **E-mail Admin:** `admin@universolimpeza.com.br` *(ou clique no acesso rápido **Admin Joana** na tela de login)*
+* **Senha:** `admin123`
+
+> **Dica de teste:** Após entrar como Administrador, utilize a barra superior para navegar entre os 4 sistemas e clique em **🔒 Sair Admin** para validar o bloqueio imediato das rotas internas.
+
+---
+
+## 🌐 Como Executar Localmente ou no GitHub Pages
+
+1. **GitHub Pages:** Basta ativar o GitHub Pages na branch `main` (pasta `/root`) nas configurações do repositório e acessar a URL gerada.
+2. **Execução Local:** Clone este repositório e abra o arquivo `index.html` diretamente em qualquer navegador moderno (não requer instalação de dependências ou servidor backend para demonstração).
+
+```bash
+git clone https://github.com/seu-usuario/universo-da-limpeza.git
 cd universo-da-limpeza
-🛠️ Tecnologias UtilizadasFront-end: HTML5 Semântico, CSS3 Modular, Tailwind CSS, JavaScript (ES6+) com isolamento de escopo e persistência sincronizada via localStorage.Visualização de Dados & UI: Gráficos interativos, componentes responsivos e design system unificado.Banco de Dados: Arquitetura relacional estruturada em SQL (banco.sql).
+```
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+* **Front-end:** HTML5 Semântico, CSS3 Modular, Tailwind CSS, JavaScript (ES6+) com isolamento de escopo e persistência sincronizada via `localStorage`.
+* **Visualização de Dados & UI:** Gráficos interativos, componentes responsivos e design system unificado.
+* **Banco de Dados:** Arquitetura relacional estruturada em SQL (`banco.sql`).
