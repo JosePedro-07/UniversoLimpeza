@@ -1,9 +1,5 @@
 # 🧼 Universo da Limpeza — Ecossistema Integrado de Gestão, ERP, BI & Automação IA
 
-![Status](https://img.shields.io/badge/Status-Online%20%7C%20GitHub%20Pages-00A896?style=for-the-badge)
-![Arquitetura](https://img.shields.io/badge/Arquitetura-Multi--M%C3%B3dulo%20RBAC-0F4C81?style=for-the-badge)
-![Stack](https://img.shields.io/badge/Stack-HTML5%20%7C%20CSS3%20%7C%20JavaScript%20%7C%20SQL-F59E0B?style=for-the-badge)
-
 Plataforma completa e unificada desenvolvida para a operação ponta a ponta da **Universo da Limpeza**, integrando **E-commerce B2C/B2B**, **Controle de Caixa**, **ERP com Leitor de Código de Barras**, **Business Intelligence (BI)** e **Automação Omnichannel com Inteligência Artificial (ManyChat)** em um único ecossistema protegido por controle de acesso.
 
 ---
