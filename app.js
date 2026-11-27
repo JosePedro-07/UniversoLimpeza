@@ -45,7 +45,7 @@ const PRODUTOS_INICIAIS = [
   { id: 12, codigo: '00902', nome: 'Kit Faxina Pesada (Desinfetante 5L + Água Sanitária + Multiuso)', categoria: 'Kits Econômicos', preco: 27.90, estoque: 7, estoque_minimo: 4, rendimento: 'Combo completo', icone: '🏆' }
 ];
 
-const WHATSAPP_LOJA = '5517999999999';
+const WHATSAPP_LOJA = '5517991181473';
 
 function lerStorage(chave, fallback) {
   try {
