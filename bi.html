@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise de Desempenho e Estoque - Universo da Limpeza | Google Looker Studio</title>
+  
+  <!-- Fontes Google (Roboto e Inter) para fidelidade visual ao Google Looker Studio -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Roboto', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            display: ['Inter', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            looker: {
+              bg: '#F1F3F4',
+              card: '#FFFFFF',
+              border: '#DADCE0',
+              blue: '#1A73E8',
+              blueHover: '#1557B0',
+              blueLight: '#E8F0FE',
+              green: '#1E8E3E',
+              purple: '#9334E6',
+              amber: '#F9AB00',
+              red: '#D93025',
+              redCritical: '#C5221F',
+              text: '#202124',
+              subtext: '#5F6368',
+            }
+          },
+          boxShadow: {
+            looker: '0 1px 2px rgba(60, 64, 67, 0.12), 0 1px 3px 1px rgba(60, 64, 67, 0.06)',
+            lookerHover: '0 2px 6px rgba(60, 64, 67, 0.18)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos base e refinamentos visuais do Google Looker Studio */
+    body {
+      font-family: 'Roboto', 'Inter', sans-serif;
+      background-color: #F1F3F4;
+      color: #202124;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Régua sutil característica do topo da área de relatório do Looker Studio */
+    .looker-ruler {
+      background-image: repeating-linear-gradient(
+        to right,
+        #DADCE0 0px,
+        #DADCE0 1px,
+        transparent 1px,
+        transparent 20px
+      );
+      background-size: 100% 6px;
+      background-repeat: no-repeat;
+      background-position: bottom left;
+    }
+
+    /* Animação suave das barras horizontais */
+    .bar-fill {
+      transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease;
+    }
+    .bar-row:hover .bar-fill {
+      filter: brightness(0.94);
+    }
+
+    /* Scrollbar discreta */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F3F4;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #C4C7C5;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9AA0A6;
+    }
+
+    /* Destaque sutil no modo Editar */
+    .edit-mode-card {
+      position: relative;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .is-editing .edit-mode-card:hover {
+      border-color: #1A73E8;
+      box-shadow: 0 0 0 1px #1A73E8, 0 2px 6px rgba(26, 115, 232, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- Barra Unificada do Ecossistema (Exclusiva para Administrador Logado) -->
+  <nav id="adminSuiteSwitcher" class="hidden bg-[#020617] text-slate-50 border-b border-slate-800 py-2 px-4 text-xs">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]"></span>
+        <strong class="font-bold">Ecossistema Universo da Limpeza</strong>
+        <span id="adminSuiteUserBadge" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">Admin Autenticado</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <a href="index.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">🛒 1. Loja &amp; Gestão Caixa</a>
+        <a href="erp.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">📦 2. UniGestão ERP &amp; PDV</a>
+        <a href="bi.html" class="px-3 py-1 rounded-lg bg-teal-700 border border-teal-500 text-white font-semibold transition">📊 3. Looker Studio BI</a>
+        <a href="manychat.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">🤖 4. ManyChat IA &amp; CRM</a>
+        <button type="button" onclick="window.ulLogoutAdmin()" class="ml-2 px-2.5 py-1 rounded-lg bg-rose-950/80 hover:bg-rose-800 border border-rose-800 text-rose-200 font-semibold transition cursor-pointer">🔒 Sair Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- GUARDA DE SEGURANÇA: BLOQUEIA ACESSO DE CLIENTES E NÃO-AUTENTICADOS -->
+  <style>
+    body.ul-locked > *:not(#ulSecurityGate) { display: none !important; }
+  </style>
+  <div id="ulSecurityGate" class="fixed inset-0 z-[9999] bg-slate-950 text-slate-100 flex items-center justify-center p-4" style="display:none;">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center text-xl">🔒</div>
+        <div>
+          <h2 class="text-base font-bold text-white">Acesso Restrito ao Administrador</h2>
+          <p class="text-xs text-slate-400">Área protegida do Ecossistema Universo da Limpeza</p>
+        </div>
+      </div>
+      <div id="ulGateAlert" class="bg-amber-950/50 border border-amber-800/70 rounded-xl p-3 text-xs text-amber-200 leading-relaxed">
+        Este módulo interno (ERP, BI ou Automação ManyChat) é exclusivo para administradores autenticados. Clientes têm acesso apenas à loja virtual para realização de pedidos.
+      </div>
+      <form onsubmit="window.ulGateLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail do Administrador</label>
+          <input id="ulGateEmail" type="email" value="admin@universolimpeza.com.br" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-teal-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Senha Administrativa</label>
+          <input id="ulGatePass" type="password" value="admin123" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-teal-500" />
+        </div>
+        <p id="ulGateError" class="hidden text-xs text-rose-400 font-semibold"></p>
+        <div class="flex flex-col sm:flex-row gap-2 pt-2">
+          <button type="submit" class="flex-1 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition cursor-pointer">Autenticar como Admin</button>
+          <a href="index.html" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center transition">← Voltar à Loja</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function() {
+      const SESSION_KEY = 'ul_auth_session_v1';
+      function getSession() {
+        try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; }
+      }
+      function checkAccess() {
+        const sess = getSession();
+        const isAdmin = Boolean(sess && (sess.role === 'admin' || sess.perfil === 'admin'));
+        const gate = document.getElementById('ulSecurityGate');
+        const bar = document.getElementById('adminSuiteSwitcher');
+        if (isAdmin) {
+          document.body.classList.remove('ul-locked');
+          if (gate) gate.style.display = 'none';
+          if (bar) {
+            bar.classList.remove('hidden');
+            const badge = document.getElementById('adminSuiteUserBadge');
+            if (badge && (sess.nome || sess.name)) badge.textContent = 'Admin: ' + (sess.nome || sess.name);
+          }
+        } else {
+          document.body.classList.add('ul-locked');
+          if (gate) gate.style.display = 'flex';
+          if (bar) bar.classList.add('hidden');
+          const alertBox = document.getElementById('ulGateAlert');
+          if (sess && (sess.role === 'cliente' || sess.role === 'customer' || sess.perfil === 'cliente') && alertBox) {
+            alertBox.innerHTML = '<strong>Acesso Negado para Conta de Cliente (' + (sess.nome || sess.name || 'Cliente') + '):</strong> Sua conta possui permissão apenas para fazer pedidos na loja. Faça login com uma conta de Administrador para acessar o ecossistema.';
+          }
+        }
+      }
+      window.ulGateLogin = function(e) {
+        e.preventDefault();
+        const email = document.getElementById('ulGateEmail').value.trim().toLowerCase();
+        const pass = document.getElementById('ulGatePass').value;
+        const err = document.getElementById('ulGateError');
+        if ((email === 'joana@universolimpeza.com.br' || email === 'admin@universolimpeza.com.br') && pass === 'admin123') {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            role: 'admin',
+            perfil: 'admin',
+            nome: 'Joana (Administração)',
+            email: email,
+            loggedAt: Date.now()
+          }));
+          err.classList.add('hidden');
+          checkAccess();
+        } else {
+          err.textContent = 'Credenciais inválidas. Apenas administradores autorizados podem acessar este módulo.';
+          err.classList.remove('hidden');
+        }
+      };
+      window.ulLogoutAdmin = function() {
+        localStorage.removeItem(SESSION_KEY);
+        window.location.href = 'index.html';
+      };
+      checkAccess();
+      window.addEventListener('storage', checkAccess);
+    })();
+  </script>
+
+
+  <!-- ===================================================================== -->
+  <!-- BARRA SUPERIOR (HEADER) ESTILO GOOGLE LOOKER STUDIO                   -->
+  <!-- ===================================================================== -->
+  <header class="bg-white border-b border-[#DADCE0] sticky top-0 z-30">
+    <div class="flex items-center justify-between h-14 px-3 sm:px-4 gap-2">
+      
+      <!-- Esquerda: Menu Mobile + Logo Google Looker Studio + Título do Relatório -->
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <!-- Botão de menu para telas móveis -->
+        <button
+          id="mobileSidebarBtn"
+          type="button"
+          aria-label="Abrir menu lateral"
+          class="lg:hidden p-2 rounded-lg text-[#5F6368] hover:bg-[#F1F3F4] focus:outline-none focus:ring-2 focus:ring-[#1A73E8]"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <!-- Logotipo Google Looker Studio -->
+        <a href="#dashboard" onclick="navigateTo('dashboard'); return false;" class="flex items-center gap-2 shrink-0 group">
+          <!-- Ícone geométrico colorido oficial Looker Studio -->
+          <svg class="w-7 h-7 shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="19.5" cy="9.5" r="4.2" stroke="#1A73E8" stroke-width="2.6" />
+            <circle cx="11.5" cy="14.5" r="3.4" stroke="#EA4335" stroke-width="2.4" />
+            <circle cx="13.5" cy="22.5" r="2.8" stroke="#FBBC04" stroke-width="2.3" />
+            <circle cx="21.5" cy="21" r="3.6" stroke="#34A853" stroke-width="2.4" />
+            <path d="M14.5 12.8L16.2 11.6M13.8 17.6L14.2 19.7M17.2 21.5L18.1 21.3" stroke="#5F6368" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <div class="hidden sm:flex items-baseline gap-1 text-[17px] tracking-tight">
+            <span class="font-medium">
+              <span class="text-[#4285F4]">G</span><span class="text-[#EA4335]">o</span><span class="text-[#FBBC05]">o</span><span class="text-[#4285F4]">g</span><span class="text-[#34A853]">l</span><span class="text-[#EA4335]">e</span>
+            </span>
+            <span class="text-[#5F6368] font-normal">Looker Studio</span>
+          </div>
+        </a>
+
+        <!-- Divisor vertical -->
+        <div class="hidden md:block h-6 w-[1px] bg-[#DADCE0] mx-1"></div>
+
+        <!-- Título do Relatório + Seletor de Período -->
+        <div class="relative min-w-0">
+          <button
+            id="periodDropdownBtn"
+            type="button"
+            class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-[#F1F3F4] transition-colors text-left max-w-full"
+            title="Selecionar período de análise"
+          >
+            <span class="text-[14px] sm:text-[16px] text-[#202124] truncate">
+              Análise de Desempenho e Estoque - <strong class="font-semibold">Universo da Limpeza</strong>
+            </span>
+            <span id="periodBadge" class="hidden xl:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#E8F0FE] text-[#1A73E8] shrink-0">
+              Mês Atual
+            </span>
+            <svg class="w-4 h-4 text-[#5F6368] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- Menu Dropdown de Período -->
+          <div
+            id="periodDropdownMenu"
+            class="hidden absolute left-0 mt-1 w-64 bg-white border border-[#DADCE0] rounded-lg shadow-lg py-1.5 z-50"
+          >
+            <div class="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#5F6368]">
+              Período de Análise
+            </div>
+            <button type="button" onclick="setPeriod('mes_atual')" data-period="mes_atual" class="period-option w-full flex items-center justify-between px-3 py-2 text-sm text-[#202124] hover:bg-[#F1F3F4]">
+              <span>Mês Atual (Padrão)</span>
+              <span class="check-icon text-[#1A73E8] font-bold">✓</span>
+            </button>
+            <button type="button" onclick="setPeriod('ultimos_30')" data-period="ultimos_30" class="period-option w-full flex items-center justify-between px-3 py-2 text-sm text-[#202124] hover:bg-[#F1F3F4]">
+              <span>Últimos 30 dias</span>
+              <span class="check-icon hidden text-[#1A73E8] font-bold">✓</span>
+            </button>
+            <button type="button" onclick="setPeriod('trimestre')" data-period="trimestre" class="period-option w-full flex items-center justify-between px-3 py-2 text-sm text-[#202124] hover:bg-[#F1F3F4]">
+              <span>Trimestre Consolidado</span>
+              <span class="check-icon hidden text-[#1A73E8] font-bold">✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Direita: Ajuda (?) + Editar + View + Apps + Avatar -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <!-- Botão Ajuda (?) -->
+        <button
+          type="button"
+          onclick="openHelpModal()"
+          title="Ajuda e guia rápido do painel"
+          class="w-8 h-8 rounded-lg bg-[#E8F0FE] text-[#1A73E8] hover:bg-[#D2E3FC] flex items-center justify-center transition-colors"
+        >
+          <span class="w-5 h-5 rounded-full bg-[#1A73E8] text-white text-xs font-bold flex items-center justify-center">?</span>
+        </button>
+
+        <!-- Botão Editar -->
+        <div class="inline-flex rounded-md shadow-xs">
+          <button
+            id="btnEditMode"
+            type="button"
+            onclick="setMode('edit')"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-sm font-medium rounded-l-md border border-[#DADCE0] bg-white text-[#1A73E8] hover:bg-[#F8FAFD] transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+            </svg>
+            <span class="hidden sm:inline">Editar</span>
+          </button>
+          <button
+            type="button"
+            onclick="toggleToolbarVisibility()"
+            title="Mostrar/ocultar barra de ferramentas"
+            class="px-1.5 py-1.5 text-sm rounded-r-md border-t border-r border-b border-[#DADCE0] bg-white text-[#5F6368] hover:bg-[#F1F3F4] transition-colors"
+          >
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Botão View (Ativo por padrão como na imagem) -->
+        <button
+          id="btnViewMode"
+          type="button"
+          onclick="setMode('view')"
+          class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 text-sm font-medium rounded-md bg-[#1A73E8] text-white hover:bg-[#1557B0] shadow-xs transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>View</span>
+        </button>
+
+        <!-- Grade de Aplicativos Google -->
+        <button
+          type="button"
+          onclick="showToast('Google Workspace conectado: Planilhas Universo da Limpeza (sincronizado)', 'info')"
+          title="Aplicativos Google"
+          class="hidden md:flex p-2 rounded-full text-[#5F6368] hover:bg-[#F1F3F4] transition-colors"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 12c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0-6c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4-8c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2zm-4 2c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 6c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 6c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
+          </svg>
+        </button>
+
+        <!-- Avatar do Usuário -->
+        <button
+          type="button"
+          onclick="showToast('Conta: Gestor Operacional • Universo da Limpeza', 'info')"
+          title="Perfil: Universo da Limpeza"
+          class="w-8 h-8 rounded-full bg-[#8AB4F8] text-white flex items-center justify-center overflow-hidden border border-[#DADCE0] hover:ring-2 hover:ring-[#1A73E8]/40 transition-all shrink-0"
+        >
+          <svg class="w-6 h-6 text-white translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- BARRA DE FERRAMENTAS SECUNDÁRIA (IGUAL À IMAGEM E ALTERNÁVEL)       -->
+    <!-- =================================================================== -->
+    <div id="secondaryToolbar" class="bg-white border-t border-[#E8EAED] px-3 sm:px-4 py-1.5 flex items-center gap-1 sm:gap-2 overflow-x-auto">
+      <!-- Desfazer / Refazer -->
+      <div class="flex items-center gap-0.5 shrink-0">
+        <button
+          id="btnUndo"
+          type="button"
+          onclick="undoAction()"
+          disabled
+          title="Desfazer última alteração"
+          class="p-1.5 rounded text-[#5F6368] hover:bg-[#F1F3F4] disabled:opacity-35 disabled:pointer-events-none transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+          </svg>
+        </button>
+        <button
+          id="btnRedo"
+          type="button"
+          onclick="redoAction()"
+          disabled
+          title="Refazer alteração"
+          class="p-1.5 rounded text-[#5F6368] hover:bg-[#F1F3F4] disabled:opacity-35 disabled:pointer-events-none transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l6-6m0 0l-6-6m6 6H9a6 6 0 000 12h3" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="h-5 w-[1px] bg-[#DADCE0] mx-0.5 shrink-0"></div>
+
+      <!-- Ícones de Ferramentas Looker Studio (Tabela, Lixeira, Seleção) -->
+      <div class="flex items-center gap-1 shrink-0">
+        <button
+          type="button"
+          onclick="navigateTo('dashboard')"
+          title="Visão de Grade e Cartões"
+          class="p-1.5 rounded bg-[#E8F0FE] text-[#1A73E8] border border-[#D2E3FC] transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onclick="resetToDefaultData()"
+          title="Restaurar dados iniciais"
+          class="p-1.5 rounded text-[#5F6368] hover:bg-[#F1F3F4] transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onclick="navigateTo('visualizacao')"
+          title="Adicionar ou alternar visualização de gráfico"
+          class="inline-flex items-center gap-0.5 p-1.5 rounded text-[#5F6368] hover:bg-[#F1F3F4] transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h6v6H3V3zm12 0h6v6h-6V3zM3 15h6v6H3v-6zm13 1v4m-2-2h4" />
+          </svg>
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="h-5 w-[1px] bg-[#DADCE0] mx-0.5 shrink-0"></div>
+
+      <!-- Botão Comparar (Ativa/desativa comparativos percentuais nos cartões) -->
+      <button
+        id="btnCompare"
+        type="button"
+        onclick="toggleCompareMode()"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-medium text-[#3C4043] hover:bg-[#F1F3F4] border border-transparent transition-colors shrink-0"
+      >
+        <svg class="w-4 h-4 text-[#5F6368]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+        </svg>
+        <span>Comparar</span>
+        <svg class="w-3.5 h-3.5 text-[#5F6368]" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <div class="h-5 w-[1px] bg-[#DADCE0] mx-0.5 shrink-0"></div>
+
+      <!-- Botão + Produto (Modal para adicionar/repor estoque) -->
+      <button
+        type="button"
+        onclick="openAddProductModal()"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-medium text-[#1A73E8] bg-[#E8F0FE]/70 hover:bg-[#E8F0FE] border border-[#D2E3FC] transition-colors shrink-0"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>+ Produto</span>
+      </button>
+
+      <!-- Ícones complementares estilo Looker Studio -->
+      <button
+        type="button"
+        onclick="navigateTo('estoque')"
+        title="Controle de Estoque e Giro"
+        class="hidden md:inline-flex p-1.5 rounded text-[#5F6368] hover:bg-[#F1F3F4] transition-colors shrink-0"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+      </button>
+
+      <div class="h-5 w-[1px] bg-[#DADCE0] mx-0.5 shrink-0"></div>
+
+      <!-- Botão Exportar CSV (Baixa arquivo CSV real com os dados da tabela) -->
+      <button
+        type="button"
+        onclick="exportTableToCSV()"
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-medium text-[#3C4043] hover:bg-[#F1F3F4] border border-transparent hover:border-[#DADCE0] transition-colors shrink-0"
+      >
+        <svg class="w-4 h-4 text-[#5F6368]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        <span>Exportar CSV</span>
+      </button>
+
+      <!-- Indicador discreto de modo ativo à direita -->
+      <div class="ml-auto hidden xl:flex items-center gap-2 text-xs text-[#5F6368] shrink-0">
+        <span class="inline-block w-2 h-2 rounded-full bg-[#1E8E3E]"></span>
+        <span>Dados sincronizados</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- CORPO PRINCIPAL: BARRA LATERAL RETRÁTIL + ÁREA DE RELATÓRIO           -->
+  <!-- ===================================================================== -->
+  <div class="flex flex-1 min-h-0 relative">
+    
+    <!-- Backdrop para menu mobile -->
+    <div
+      id="sidebarBackdrop"
+      onclick="closeMobileSidebar()"
+      class="hidden fixed inset-0 bg-black/30 z-30 lg:hidden"
+    ></div>
+
+    <!-- BARRA LATERAL ESQUERDA RETRÁTIL -->
+    <aside
+      id="leftSidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-[216px] bg-white border-r border-[#DADCE0] flex flex-col justify-between transition-all duration-200 -translate-x-full lg:translate-x-0 shrink-0"
+    >
+      <div class="py-2 flex flex-col gap-1">
+        <!-- Topo da sidebar: ← Edit / Recolher -->
+        <button
+          type="button"
+          onclick="toggleSidebarCollapse()"
+          class="flex items-center gap-3 px-4 py-2.5 text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors"
+        >
+          <svg id="sidebarBackArrow" class="w-4 h-4 text-[#5F6368] shrink-0 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          <span class="sidebar-label font-normal">Edit</span>
+        </button>
+
+        <div class="border-b border-[#E8EAED] my-1"></div>
+
+        <!-- Item Principal: Dashboard -->
+        <div class="px-2">
+          <button
+            type="button"
+            data-nav="dashboard"
+            onclick="navigateTo('dashboard')"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium bg-[#E8F0FE] text-[#1A73E8] transition-colors"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+            <span class="sidebar-label truncate">Dashboard</span>
+          </button>
+        </div>
+
+        <div class="border-b border-[#E8EAED] my-2"></div>
+
+        <!-- Seção: Análise -->
+        <div class="px-4 pt-1 pb-1">
+          <span class="sidebar-label text-[12px] font-medium text-[#5F6368]">Análise</span>
+        </div>
+        <div class="px-2 flex flex-col gap-0.5">
+          <button
+            type="button"
+            data-nav="analise"
+            onclick="navigateTo('analise')"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors"
+          >
+            <svg class="w-4 h-4 text-[#5F6368] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+            </svg>
+            <span class="sidebar-label truncate">Análise</span>
+          </button>
+
+          <button
+            type="button"
+            data-nav="visualizacao"
+            onclick="navigateTo('visualizacao')"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors"
+          >
+            <svg class="w-4 h-4 text-[#5F6368] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+            </svg>
+            <span class="sidebar-label truncate">Visualização</span>
+          </button>
+        </div>
+
+        <div class="border-b border-[#E8EAED] my-2"></div>
+
+        <!-- Seção: Gestão -->
+        <div class="px-4 pt-1 pb-1">
+          <span class="sidebar-label text-[12px] font-medium text-[#5F6368]">Gestão</span>
+        </div>
+        <div class="px-2 flex flex-col gap-0.5">
+          <button
+            type="button"
+            data-nav="estoque"
+            onclick="navigateTo('estoque')"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors"
+          >
+            <svg class="w-4 h-4 text-[#5F6368] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+            <span class="sidebar-label truncate">Estoque</span>
+          </button>
+
+          <button
+            type="button"
+            data-nav="configuracoes"
+            onclick="navigateTo('configuracoes')"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors"
+          >
+            <svg class="w-4 h-4 text-[#5F6368] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            <span class="sidebar-label truncate">Configurações</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Rodapé da barra lateral com botão recolher (<) -->
+      <div class="p-2 border-t border-[#E8EAED] hidden lg:flex justify-end">
+        <button
+          type="button"
+          onclick="toggleSidebarCollapse()"
+          title="Recolher ou expandir barra lateral"
+          class="p-2 rounded-lg text-[#5F6368] hover:bg-[#F1F3F4] transition-colors"
+        >
+          <svg id="sidebarCollapseChevron" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- =================================================================== -->
+    <!-- ÁREA PRINCIPAL DO RELATÓRIO (CANVAS LOOKER STUDIO)                  -->
+    <!-- =================================================================== -->
+    <main id="mainCanvas" class="flex-1 min-w-0 bg-[#F1F3F4] flex flex-col">
+      <!-- Régua superior sutil do Looker Studio -->
+      <div class="h-3.5 bg-[#F8F9FA] border-b border-[#DADCE0] looker-ruler w-full shrink-0"></div>
+
+      <!-- Faixa de aviso quando o modo Editar está ativado -->
+      <div id="editModeBanner" class="hidden bg-[#E8F0FE] border-b border-[#D2E3FC] px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#1967D2]">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold">Modo de Edição Ativo:</span>
+          <span>Clique em qualquer produto da tabela ou no contador de viagem para ajustar métricas em tempo real.</span>
+        </div>
+        <button type="button" onclick="setMode('view')" class="font-semibold underline hover:text-[#1557B0]">
+          Voltar para View
+        </button>
+      </div>
+
+      <!-- Container interno das páginas/abas -->
+      <div class="p-3 sm:p-5 lg:p-6 max-w-[1600px] w-full mx-auto flex-1">
+
+        <!-- =============================================================== -->
+        <!-- VISÃO 1: DASHBOARD PRINCIPAL (IDÊNTICO À IMAGEM NA VISÃO INICIAL) -->
+        <!-- =============================================================== -->
+        <section id="view-dashboard" class="space-y-4">
+          
+          <!-- LINHA 1: GRID DE 4 CARTÕES KPI IGUAIS -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            
+            <!-- Cartão 1: Faturamento Mensal -->
+            <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker px-5 py-4 flex flex-col items-center justify-center text-center min-h-[124px]">
+              <h2 class="text-[14px] sm:text-[15px] font-medium text-[#202124] mb-1.5">
+                Faturamento Mensal
+              </h2>
+              <div id="kpiFaturamento" class="text-[32px] sm:text-[36px] font-medium text-[#111827] leading-tight tracking-tight tabular-nums">
+                R$ 48.250
+              </div>
+              <div id="kpiFaturamentoDelta" class="mt-1 text-[14px] font-medium text-[#1E8E3E] tabular-nums">
+                +12%
+              </div>
+            </div>
+
+            <!-- Cartão 2: Vendas Online (WhatsApp/Insta) -->
+            <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker px-5 py-4 flex flex-col items-center justify-center text-center min-h-[124px]">
+              <h2 class="text-[14px] sm:text-[15px] font-medium text-[#202124] mb-1.5">
+                Vendas Online (WhatsApp/Insta)
+              </h2>
+              <div class="flex items-center justify-center gap-1.5">
+                <span id="kpiVendasOnline" class="text-[32px] sm:text-[36px] font-medium text-[#111827] leading-tight tracking-tight tabular-nums">
+                  62%
+                </span>
+                <span class="text-[#1E8E3E] text-[15px] leading-none translate-y-0.5" aria-label="Tendência de alta">▲</span>
+              </div>
+              <div id="kpiVendasOnlineCompare" class="hidden mt-1 text-[13px] font-medium text-[#1E8E3E]">
+                +5,4% vs mês anterior
+              </div>
+            </div>
+
+            <!-- Cartão 3: Pedidos Realizados -->
+            <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker px-5 py-4 flex flex-col items-center justify-center text-center min-h-[124px]">
+              <h2 class="text-[14px] sm:text-[15px] font-medium text-[#202124] mb-1.5">
+                Pedidos Realizados
+              </h2>
+              <div id="kpiPedidos" class="text-[32px] sm:text-[36px] font-medium text-[#111827] leading-tight tracking-tight tabular-nums">
+                340
+              </div>
+              <div id="kpiPedidosCompare" class="hidden mt-1 text-[13px] font-medium text-[#1E8E3E]">
+                +28 pedidos (+9,0%)
+              </div>
+            </div>
+
+            <!-- Cartão 4: Giro de Estoque -->
+            <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker px-5 py-4 flex flex-col items-center justify-center text-center min-h-[124px]">
+              <h2 class="text-[14px] sm:text-[15px] font-medium text-[#202124] mb-1.5">
+                Giro de Estoque
+              </h2>
+              <div id="kpiGiro" class="text-[32px] sm:text-[36px] font-medium text-[#111827] leading-tight tracking-tight tabular-nums">
+                1.8x
+              </div>
+              <div id="kpiGiroCompare" class="hidden mt-1 text-[13px] font-medium text-[#1E8E3E]">
+                +0,2x acima da meta
+              </div>
+            </div>
+
+          </div>
+
+          <!-- LINHAS 2 E 3: GRID ASSIMÉTRICO (~72% ESQUERDA / ~28% DIREITA) -->
+          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,72%)_minmax(0,28%)] gap-4 items-start">
+            
+            <!-- COLUNA ESQUERDA (~72%): Gráfico de Barras + Tabela de Reposição -->
+            <div class="space-y-4 min-w-0">
+              
+              <!-- Cartão Superior Esquerdo: Produtos Mais Vendidos -->
+              <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-4 sm:p-5 relative">
+                <div class="flex items-center justify-between gap-2 mb-4">
+                  <h3 class="text-[17px] sm:text-[18px] font-semibold text-[#202124]">
+                    Produtos Mais Vendidos
+                  </h3>
+                  <span class="text-xs text-[#5F6368] hidden sm:inline">
+                    Passe o cursor sobre as barras para detalhes
+                  </span>
+                </div>
+
+                <!-- Gráfico de Barras Horizontais Interativo -->
+                <div id="horizontalBarChart" class="w-full select-none">
+                  <!-- Renderizado via JavaScript com escala 0 a 3.000 -->
+                </div>
+              </div>
+
+              <!-- Cartão Inferior Esquerdo: Previsão de Reposição de Estoque -->
+              <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <h3 class="text-[17px] sm:text-[18px] font-semibold text-[#202124]">
+                    Previsão de Reposição de Estoque
+                  </h3>
+                  <span class="text-xs text-[#5F6368]">
+                    Clique em uma linha para registrar reposição ou ajustar giro
+                  </span>
+                </div>
+
+                <div class="overflow-x-auto -mx-4 sm:mx-0">
+                  <div class="inline-block min-w-full align-middle px-4 sm:px-0">
+                    <table class="min-w-full border-collapse text-left">
+                      <thead>
+                        <tr class="border-b border-[#DADCE0] text-[13px] font-semibold text-[#202124]">
+                          <th scope="col" class="py-2.5 pr-2 w-8 text-[#5F6368]"></th>
+                          <th scope="col" class="py-2.5 px-2">Produto</th>
+                          <th scope="col" class="py-2.5 px-3 text-right">Estoque Atual</th>
+                          <th scope="col" class="py-2.5 px-3 text-right">Giro Diário</th>
+                          <th scope="col" class="py-2.5 px-3 text-right">Dias Restantes</th>
+                          <th scope="col" class="py-2.5 pl-3 pr-1">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="replenishmentTableBody" class="divide-y divide-[#E8EAED] text-[13.5px] text-[#202124]">
+                        <!-- Linhas renderizadas dinamicamente via JavaScript -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- COLUNA DIREITA (~28%): Logística Limeira (MG) - Alerta de Viagem -->
+            <div class="space-y-4 min-w-0">
+              <div class="edit-mode-card bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-4 sm:p-5">
+                <h3 class="text-[17px] sm:text-[18px] font-medium text-[#202124] leading-snug mb-4">
+                  Logística Limeira (MG) -<br />Alerta de Viagem
+                </h3>
+
+                <div class="text-[14.5px] text-[#202124] mb-1">
+                  Dias até a próxima viagem:
+                </div>
+
+                <!-- Destaque grande + controles discretos para simular alteração de dias -->
+                <div class="flex items-center justify-between gap-2 my-1">
+                  <div id="tripDaysDisplay" class="text-[32px] sm:text-[36px] font-semibold text-[#111827] leading-tight tabular-nums">
+                    12 dias
+                  </div>
+
+                  <div class="flex items-center gap-1" title="Simular alteração de dias até a viagem">
+                    <button
+                      type="button"
+                      onclick="adjustTripDays(-1)"
+                      aria-label="Diminuir dias até a viagem"
+                      class="w-7 h-7 rounded-md border border-[#DADCE0] bg-[#F8F9FA] hover:bg-[#E8F0FE] hover:border-[#1A73E8] text-[#3C4043] hover:text-[#1A73E8] flex items-center justify-center text-sm font-bold transition-colors"
+                    >
+                      −
+                    </button>
+                    <button
+                      type="button"
+                      onclick="adjustTripDays(1)"
+                      aria-label="Aumentar dias até a viagem"
+                      class="w-7 h-7 rounded-md border border-[#DADCE0] bg-[#F8F9FA] hover:bg-[#E8F0FE] hover:border-[#1A73E8] text-[#3C4043] hover:text-[#1A73E8] flex items-center justify-center text-sm font-bold transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <p class="mt-3 text-[13.5px] text-[#3C4043] leading-relaxed">
+                  Planejamento alinhado para garantir o abastecimento e a reposição mensal de estoque.
+                </p>
+
+                <!-- Alerta dinâmico caso o prazo de viagem seja alterado para um cenário crítico -->
+                <div id="tripDynamicAlert" class="hidden mt-3 pt-3 border-t border-[#E8EAED] text-xs text-[#C5221F] font-medium flex items-start gap-1.5">
+                  <span class="shrink-0 mt-0.5">●</span>
+                  <span id="tripDynamicAlertText"></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISÃO 2: ABA ANÁLISE (DETALHAMENTO DE CANAIS E MARGEM)          -->
+        <!-- =============================================================== -->
+        <section id="view-analise" class="hidden space-y-4">
+          <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 class="text-lg font-semibold text-[#202124]">Análise Comercial e Canais de Venda</h2>
+                <p class="text-sm text-[#5F6368]">Desempenho detalhado por canal digital, ticket médio e participação por linha de produto.</p>
+              </div>
+              <button type="button" onclick="navigateTo('dashboard')" class="px-3 py-1.5 text-sm font-medium text-[#1A73E8] bg-[#E8F0FE] rounded-md hover:bg-[#D2E3FC] transition-colors">
+                ← Voltar ao Dashboard
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="p-4 rounded-lg border border-[#DADCE0] bg-[#F8F9FA]">
+                <div class="text-xs font-medium text-[#5F6368] uppercase">WhatsApp Comercial</div>
+                <div class="text-2xl font-bold text-[#202124] mt-1 tabular-nums">41% <span class="text-sm font-medium text-[#1E8E3E]">(R$ 19.782)</span></div>
+                <p class="text-xs text-[#5F6368] mt-1">142 pedidos recorrentes • Ticket médio R$ 139,31</p>
+              </div>
+              <div class="p-4 rounded-lg border border-[#DADCE0] bg-[#F8F9FA]">
+                <div class="text-xs font-medium text-[#5F6368] uppercase">Instagram Direct / Catálogo</div>
+                <div class="text-2xl font-bold text-[#202124] mt-1 tabular-nums">21% <span class="text-sm font-medium text-[#1E8E3E]">(R$ 10.133)</span></div>
+                <p class="text-xs text-[#5F6368] mt-1">69 pedidos • Alta conversão em kits concentrados</p>
+              </div>
+              <div class="p-4 rounded-lg border border-[#DADCE0] bg-[#F8F9FA]">
+                <div class="text-xs font-medium text-[#5F6368] uppercase">Balcão & Rotas Regionais</div>
+                <div class="text-2xl font-bold text-[#202124] mt-1 tabular-nums">38% <span class="text-sm font-medium text-[#5F6368]">(R$ 18.335)</span></div>
+                <p class="text-xs text-[#5F6368] mt-1">129 pedidos • Entregas locais e revenda</p>
+              </div>
+            </div>
+
+            <h3 class="text-sm font-semibold text-[#202124] mb-3">Participação por Produto no Volume Total Vendido</h3>
+            <div id="analiseProductBreakdown" class="space-y-3">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISÃO 3: ABA VISUALIZAÇÃO (COMPARATIVO VISUAL E PROJEÇÃO)       -->
+        <!-- =============================================================== -->
+        <section id="view-visualizacao" class="hidden space-y-4">
+          <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 class="text-lg font-semibold text-[#202124]">Visualização de Cobertura de Estoque (Dias Restantes)</h2>
+                <p class="text-sm text-[#5F6368]">Comparação visual entre dias restantes de estoque e a próxima viagem para Limeira (MG).</p>
+              </div>
+              <button type="button" onclick="navigateTo('dashboard')" class="px-3 py-1.5 text-sm font-medium text-[#1A73E8] bg-[#E8F0FE] rounded-md hover:bg-[#D2E3FC] transition-colors">
+                ← Voltar ao Dashboard
+              </button>
+            </div>
+
+            <div id="coverageChartContainer" class="space-y-4 mt-4">
+              <!-- Gráfico comparativo de cobertura vs viagem Limeira -->
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISÃO 4: ABA ESTOQUE (GESTÃO COMPLETA E REPOSIÇÃO RÁPIDA)       -->
+        <!-- =============================================================== -->
+        <section id="view-estoque" class="hidden space-y-4">
+          <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div>
+                <h2 class="text-lg font-semibold text-[#202124]">Gestão de Estoque — Universo da Limpeza</h2>
+                <p class="text-sm text-[#5F6368]">Filtre por status, simule entradas de mercadoria e exporte o relatório atualizado.</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="openAddProductModal()" class="px-3 py-1.5 text-sm font-medium text-white bg-[#1A73E8] rounded-md hover:bg-[#1557B0] transition-colors">
+                  + Novo Produto
+                </button>
+                <button type="button" onclick="exportTableToCSV()" class="px-3 py-1.5 text-sm font-medium text-[#3C4043] border border-[#DADCE0] rounded-md hover:bg-[#F1F3F4] transition-colors">
+                  Exportar CSV
+                </button>
+              </div>
+            </div>
+
+            <!-- Filtros de busca e status -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div class="relative w-full sm:w-72">
+                <input
+                  id="stockSearchInput"
+                  type="text"
+                  oninput="renderStockView()"
+                  placeholder="Buscar produto..."
+                  class="w-full pl-9 pr-3 py-1.5 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8]"
+                />
+                <svg class="w-4 h-4 text-[#5F6368] absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5" id="stockFilterPills">
+                <button type="button" onclick="setStockFilter('all')" data-filter="all" class="filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#1A73E8] text-white">Todos</button>
+                <button type="button" onclick="setStockFilter('critico')" data-filter="critico" class="filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#F1F3F4] text-[#3C4043] hover:bg-[#E8EAED]">Crítico</button>
+                <button type="button" onclick="setStockFilter('atencao')" data-filter="atencao" class="filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#F1F3F4] text-[#3C4043] hover:bg-[#E8EAED]">Atenção</button>
+                <button type="button" onclick="setStockFilter('adequado')" data-filter="adequado" class="filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#F1F3F4] text-[#3C4043] hover:bg-[#E8EAED]">Adequado</button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full border-collapse text-left">
+                <thead>
+                  <tr class="border-b border-[#DADCE0] text-[13px] font-semibold text-[#202124]">
+                    <th class="py-2.5 px-2">#</th>
+                    <th class="py-2.5 px-2">Produto</th>
+                    <th class="py-2.5 px-3 text-right">Vendas (un.)</th>
+                    <th class="py-2.5 px-3 text-right">Estoque Atual</th>
+                    <th class="py-2.5 px-3 text-right">Giro Diário</th>
+                    <th class="py-2.5 px-3 text-right">Dias Restantes</th>
+                    <th class="py-2.5 px-3">Status</th>
+                    <th class="py-2.5 px-3 text-right">Ação Rápida</th>
+                  </tr>
+                </thead>
+                <tbody id="fullStockTableBody" class="divide-y divide-[#E8EAED] text-[13.5px]">
+                  <!-- Renderizado via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISÃO 5: ABA CONFIGURAÇÕES                                      -->
+        <!-- =============================================================== -->
+        <section id="view-configuracoes" class="hidden space-y-4">
+          <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-looker p-5 max-w-2xl">
+            <h2 class="text-lg font-semibold text-[#202124] mb-1">Configurações do Painel — Universo da Limpeza</h2>
+            <p class="text-sm text-[#5F6368] mb-5">Personalize os parâmetros de alerta logístico e redefina os dados da demonstração.</p>
+
+            <div class="space-y-4">
+              <div>
+                <label for="cfgTripDays" class="block text-sm font-medium text-[#202124] mb-1">
+                  Dias até a próxima viagem (Limeira - MG)
+                </label>
+                <input
+                  id="cfgTripDays"
+                  type="number"
+                  min="1"
+                  max="90"
+                  value="12"
+                  onchange="updateTripDaysFromConfig(this.value)"
+                  class="w-36 px-3 py-1.5 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8]"
+                />
+              </div>
+
+              <div class="pt-3 border-t border-[#E8EAED] flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div class="text-sm font-medium text-[#202124]">Restaurar dados originais do relatório</div>
+                  <div class="text-xs text-[#5F6368]">Retorna todos os indicadores, barras e tabela ao estado inicial da imagem.</div>
+                </div>
+                <button
+                  type="button"
+                  onclick="resetToDefaultData()"
+                  class="px-3.5 py-2 text-sm font-medium text-[#C5221F] bg-[#FCE8E6] hover:bg-[#FAD2CF] rounded-md transition-colors"
+                >
+                  Restaurar Padrão
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOOLTIP FLUTUANTE DO GRÁFICO DE BARRAS                                -->
+  <!-- ===================================================================== -->
+  <div
+    id="chartTooltip"
+    class="hidden fixed z-50 pointer-events-none bg-white border border-[#DADCE0] rounded-lg shadow-lg px-3.5 py-2.5 text-xs text-[#202124] min-w-[205px]"
+  >
+    <div class="flex items-center gap-2 font-semibold text-[13px] mb-1.5">
+      <span id="tooltipDot" class="w-2.5 h-2.5 rounded-full shrink-0"></span>
+      <span id="tooltipTitle">Produto</span>
+    </div>
+    <div class="space-y-1 text-[#3C4043]">
+      <div class="flex justify-between gap-4">
+        <span>Unidades vendidas:</span>
+        <strong id="tooltipUnits" class="tabular-nums text-[#202124]">0</strong>
+      </div>
+      <div class="flex justify-between gap-4">
+        <span>Participação:</span>
+        <strong id="tooltipShare" class="tabular-nums text-[#202124]">0%</strong>
+      </div>
+      <div class="flex justify-between gap-4">
+        <span>Faturamento est.:</span>
+        <strong id="tooltipRevenue" class="tabular-nums text-[#1E8E3E]">R$ 0</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL RÁPIDO: REPOSIÇÃO DE ESTOQUE / AJUSTE DE GIRO DIÁRIO            -->
+  <!-- ===================================================================== -->
+  <div
+    id="editStockModal"
+    class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+    onclick="if (event.target === this) closeEditStockModal()"
+  >
+    <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-xl w-full max-w-md overflow-hidden">
+      <div class="px-5 py-4 border-b border-[#E8EAED] flex items-center justify-between">
+        <div>
+          <h3 class="text-[16px] font-semibold text-[#202124]">Atualizar Estoque e Giro Diário</h3>
+          <p id="modalProductName" class="text-xs text-[#5F6368] mt-0.5">Produto</p>
+        </div>
+        <button type="button" onclick="closeEditStockModal()" class="p-1.5 rounded-lg text-[#5F6368] hover:bg-[#F1F3F4]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="editStockForm" onsubmit="saveStockUpdate(event)" class="p-5 space-y-4">
+        <input type="hidden" id="editProductId" />
+
+        <!-- Atalhos de Reposição Rápida -->
+        <div>
+          <label class="block text-xs font-medium text-[#5F6368] mb-1.5">
+            Registrar entrada de reposição rápida:
+          </label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="quickAddUnits(50)" class="py-1.5 px-2 text-xs font-medium rounded-md border border-[#DADCE0] hover:border-[#1A73E8] hover:bg-[#E8F0FE] text-[#1A73E8] transition-colors">
+              +50 un.
+            </button>
+            <button type="button" onclick="quickAddUnits(100)" class="py-1.5 px-2 text-xs font-medium rounded-md border border-[#DADCE0] hover:border-[#1A73E8] hover:bg-[#E8F0FE] text-[#1A73E8] transition-colors">
+              +100 un.
+            </button>
+            <button type="button" onclick="quickAddUnits(200)" class="py-1.5 px-2 text-xs font-medium rounded-md border border-[#DADCE0] hover:border-[#1A73E8] hover:bg-[#E8F0FE] text-[#1A73E8] transition-colors">
+              +200 un.
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="inputEstoqueAtual" class="block text-xs font-medium text-[#202124] mb-1">
+              Estoque Atual (un.)
+            </label>
+            <input
+              id="inputEstoqueAtual"
+              type="number"
+              min="0"
+              step="1"
+              required
+              oninput="updateModalPreview()"
+              class="w-full px-3 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8] tabular-nums"
+            />
+          </div>
+
+          <div>
+            <label for="inputGiroDiario" class="block text-xs font-medium text-[#202124] mb-1">
+              Giro Diário (un./dia)
+            </label>
+            <input
+              id="inputGiroDiario"
+              type="number"
+              min="0.01"
+              step="0.01"
+              required
+              oninput="updateModalPreview()"
+              class="w-full px-3 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8] tabular-nums"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="inputStatusOverride" class="block text-xs font-medium text-[#202124] mb-1">
+            Status de Reposição
+          </label>
+          <select
+            id="inputStatusOverride"
+            onchange="updateModalPreview()"
+            class="w-full px-3 py-2 text-sm border border-[#DADCE0] rounded-md bg-white focus:outline-none focus:border-[#1A73E8]"
+          >
+            <option value="auto">Automático (baseado nos dias restantes)</option>
+            <option value="critico">Crítico (Repor já)</option>
+            <option value="atencao">Atenção</option>
+            <option value="adequado">Adequado</option>
+          </select>
+        </div>
+
+        <!-- Pré-visualização em tempo real -->
+        <div class="bg-[#F8F9FA] border border-[#E8EAED] rounded-lg p-3 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-[#5F6368]">Cobertura estimada:</div>
+            <div id="modalPreviewDays" class="text-base font-semibold text-[#202124] tabular-nums">23 dias</div>
+          </div>
+          <div id="modalPreviewBadge"></div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeEditStockModal()"
+            class="px-4 py-2 text-sm font-medium text-[#3C4043] hover:bg-[#F1F3F4] rounded-md transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-[#1A73E8] hover:bg-[#1557B0] rounded-md shadow-xs transition-colors"
+          >
+            Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ADICIONAR NOVO PRODUTO (+ Produto)                             -->
+  <!-- ===================================================================== -->
+  <div
+    id="addProductModal"
+    class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+    onclick="if (event.target === this) closeAddProductModal()"
+  >
+    <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-xl w-full max-w-md overflow-hidden">
+      <div class="px-5 py-4 border-b border-[#E8EAED] flex items-center justify-between">
+        <div>
+          <h3 class="text-[16px] font-semibold text-[#202124]">Adicionar Produto ao Painel</h3>
+          <p class="text-xs text-[#5F6368] mt-0.5">Inclui o item no gráfico de vendas e na previsão de estoque</p>
+        </div>
+        <button type="button" onclick="closeAddProductModal()" class="p-1.5 rounded-lg text-[#5F6368] hover:bg-[#F1F3F4]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="addProductForm" onsubmit="handleAddProduct(event)" class="p-5 space-y-3.5">
+        <div>
+          <label for="newProdName" class="block text-xs font-medium text-[#202124] mb-1">Nome do Produto</label>
+          <input
+            id="newProdName"
+            type="text"
+            required
+            placeholder="Ex: Limpa Vidros 2L"
+            class="w-full px-3 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8]"
+          />
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label for="newProdSales" class="block text-xs font-medium text-[#202124] mb-1">Vendas (un.)</label>
+            <input
+              id="newProdSales"
+              type="number"
+              min="1"
+              max="3000"
+              value="920"
+              required
+              class="w-full px-2.5 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8] tabular-nums"
+            />
+          </div>
+          <div>
+            <label for="newProdStock" class="block text-xs font-medium text-[#202124] mb-1">Estoque Atual</label>
+            <input
+              id="newProdStock"
+              type="number"
+              min="1"
+              value="140"
+              required
+              class="w-full px-2.5 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8] tabular-nums"
+            />
+          </div>
+          <div>
+            <label for="newProdTurnover" class="block text-xs font-medium text-[#202124] mb-1">Giro Diário</label>
+            <input
+              id="newProdTurnover"
+              type="number"
+              min="0.05"
+              step="0.01"
+              value="0.85"
+              required
+              class="w-full px-2.5 py-2 text-sm border border-[#DADCE0] rounded-md focus:outline-none focus:border-[#1A73E8] tabular-nums"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="newProdColor" class="block text-xs font-medium text-[#202124] mb-1">Cor da Barra no Gráfico</label>
+          <select id="newProdColor" class="w-full px-3 py-2 text-sm border border-[#DADCE0] rounded-md bg-white focus:outline-none focus:border-[#1A73E8]">
+            <option value="#1A73E8">Azul Google (#1A73E8)</option>
+            <option value="#9334E6">Roxo (#9334E6)</option>
+            <option value="#F9AB00">Âmbar (#F9AB00)</option>
+            <option value="#1E8E3E">Verde (#1E8E3E)</option>
+            <option value="#D93025">Vermelho (#D93025)</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAddProductModal()" class="px-4 py-2 text-sm font-medium text-[#3C4043] hover:bg-[#F1F3F4] rounded-md">
+            Cancelar
+          </button>
+          <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-[#1A73E8] hover:bg-[#1557B0] rounded-md">
+            Adicionar Produto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL DE AJUDA (?)                                                    -->
+  <!-- ===================================================================== -->
+  <div
+    id="helpModal"
+    class="hidden fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
+    onclick="if (event.target === this) closeHelpModal()"
+  >
+    <div class="bg-white border border-[#DADCE0] rounded-[8px] shadow-xl w-full max-w-md p-5">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E8EAED]">
+        <h3 class="text-base font-semibold text-[#202124]">Guia Rápido — Google Looker Studio</h3>
+        <button type="button" onclick="closeHelpModal()" class="p-1 rounded-lg text-[#5F6368] hover:bg-[#F1F3F4]">✕</button>
+      </div>
+      <ul class="mt-3 space-y-2.5 text-sm text-[#3C4043]">
+        <li>• <strong>Reposição Rápida:</strong> Clique em qualquer linha ou selo de status na tabela <em>Previsão de Reposição de Estoque</em> para registrar entrada de mercadorias ou ajustar o giro diário.</li>
+        <li>• <strong>Comparar:</strong> Use o botão <em>Comparar</em> na barra de ferramentas para exibir variações percentuais em todos os cartões KPI.</li>
+        <li>• <strong>Logística Limeira (MG):</strong> Ajuste os dias até a próxima viagem diretamente no cartão direito para simular alertas de abastecimento.</li>
+        <li>• <strong>Exportar CSV:</strong> Baixe a tabela atualizada em formato compatível com Excel e Planilhas Google.</li>
+      </ul>
+      <div class="mt-4 flex justify-end">
+        <button type="button" onclick="closeHelpModal()" class="px-4 py-1.5 text-sm font-medium text-white bg-[#1A73E8] rounded-md hover:bg-[#1557B0]">
+          Entendi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOAST NOTIFICATION (SUBSTITUI ALERT)                                  -->
+  <!-- ===================================================================== -->
+  <div
+    id="toastContainer"
+    class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
+  ></div>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA JAVASCRIPT COMPLETA E INTERATIVA                               -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * Dados iniciais fiéis à imagem e às especificações do prompt
+     */
+    const INITIAL_PRODUCTS = [
+      {
+        id: 1,
+        name: 'Detergente Concentrado',
+        sales: 2700,
+        color: '#1A73E8',
+        stock: 297,
+        turnover: 1.30,
+        daysLeft: 23,
+        status: 'critico', // Crítico (Repor já)
+        unitPrice: 6.20
+      },
+      {
+        id: 2,
+        name: 'Desinfetante Lavanda',
+        sales: 2100,
+        color: '#9334E6',
+        stock: 90,
+        turnover: 0.30,
+        daysLeft: 30,
+        status: 'atencao', // Atenção
+        unitPrice: 5.40
+      },
+      {
+        id: 3,
+        name: 'Amaciante 5L',
+        sales: 1560,
+        color: '#F9AB00',
+        stock: 200,
+        turnover: 0.30,
+        daysLeft: 30,
+        status: 'atencao', // Atenção
+        unitPrice: 5.80
+      },
+      {
+        id: 4,
+        name: 'Água Sanitária',
+        sales: 1370,
+        color: '#1E8E3E',
+        stock: 63,
+        turnover: 0.27,
+        daysLeft: 18,
+        status: 'adequado', // Adequado
+        unitPrice: 4.50
+      },
+      {
+        id: 5,
+        name: 'Sabão em Pó',
+        sales: 1060,
+        color: '#D93025',
+        stock: 110,
+        turnover: 1.37,
+        daysLeft: 22,
+        status: 'adequado', // Adequado
+        unitPrice: 4.68
+      }
+    ];
+
+    /**
+     * Configurações por período selecionável no cabeçalho
+     */
+    const PERIOD_PRESETS = {
+      mes_atual: {
+        label: 'Mês Atual',
+        faturamento: 'R$ 48.250',
+        faturamentoDelta: '+12%',
+        vendasOnline: '62%',
+        vendasOnlineCompare: '+5,4% vs mês anterior',
+        pedidos: '340',
+        pedidosCompare: '+28 pedidos (+9,0%)',
+        giroBase: 1.8,
+        giroCompare: '+0,2x acima da meta',
+        salesMultiplier: 1.0
+      },
+      ultimos_30: {
+        label: 'Últimos 30 dias',
+        faturamento: 'R$ 51.480',
+        faturamentoDelta: '+15%',
+        vendasOnline: '65%',
+        vendasOnlineCompare: '+7,1% vs período anterior',
+        pedidos: '364',
+        pedidosCompare: '+41 pedidos (+12,7%)',
+        giroBase: 1.9,
+        giroCompare: '+0,3x acima da meta',
+        salesMultiplier: 1.06
+      },
+      trimestre: {
+        label: 'Trimestre',
+        faturamento: 'R$ 138.900',
+        faturamentoDelta: '+18%',
+        vendasOnline: '59%',
+        vendasOnlineCompare: '+4,8% vs trim. anterior',
+        pedidos: '985',
+        pedidosCompare: '+112 pedidos (+12,8%)',
+        giroBase: 1.7,
+        giroCompare: '+0,1x acima da meta',
+        salesMultiplier: 1.0
+      }
+    };
+
+    /**
+     * Estado central da aplicação
+     */
+    const state = {
+      activeNav: 'dashboard',
+      mode: 'view', // 'view' | 'edit'
+      compareMode: false,
+      period: 'mes_atual',
+      tripDays: 12,
+      sidebarCollapsed: false,
+      stockFilter: 'all',
+      products: JSON.parse(JSON.stringify(INITIAL_PRODUCTS)),
+      history: [],
+      future: []
+    };
+
+    /* ===================================================================== */
+    /* FUNÇÕES AUXILIARES DE FORMATAÇÃO E STATUS                             */
+    /* ===================================================================== */
+
+    function formatDotNumber(num) {
+      return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function formatCommaDecimal(num) {
+      return Number(num).toFixed(2).replace('.', ',');
+    }
+
+    function formatCurrencyBRL(value) {
+      return value.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0
+      });
+    }
+
+    function computeStatusFromDays(daysLeft) {
+      if (daysLeft <= 12) return 'critico';
+      if (daysLeft <= 24) return 'atencao';
+      return 'adequado';
+    }
+
+    function getStatusBadgeHTML(statusKey) {
+      if (statusKey === 'critico') {
+        return `<span class="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-[12px] font-medium bg-[#C5221F] text-white whitespace-nowrap shadow-2xs">Crítico (Repor já)</span>`;
+      }
+      if (statusKey === 'atencao') {
+        return `<span class="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-[12px] font-medium bg-[#F9AB00] text-[#202124] whitespace-nowrap shadow-2xs">Atenção</span>`;
+      }
+      return `<span class="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-[12px] font-medium bg-[#1E8E3E] text-white whitespace-nowrap shadow-2xs">Adequado</span>`;
+    }
+
+    function getStatusPlainLabel(statusKey) {
+      if (statusKey === 'critico') return 'Crítico (Repor já)';
+      if (statusKey === 'atencao') return 'Atenção';
+      return 'Adequado';
+    }
+
+    /* ===================================================================== */
+    /* GERENCIAMENTO DE HISTÓRICO (DESFAZER / REFAZER)                       */
+    /* ===================================================================== */
+
+    function pushHistorySnapshot() {
+      state.history.push({
+        products: JSON.parse(JSON.stringify(state.products)),
+        tripDays: state.tripDays
+      });
+      if (state.history.length > 25) state.history.shift();
+      state.future = [];
+      updateUndoRedoButtons();
+    }
+
+    function undoAction() {
+      if (!state.history.length) return;
+      state.future.push({
+        products: JSON.parse(JSON.stringify(state.products)),
+        tripDays: state.tripDays
+      });
+      const prev = state.history.pop();
+      state.products = prev.products;
+      state.tripDays = prev.tripDays;
+      updateUndoRedoButtons();
+      renderAll();
+      showToast('Última alteração desfeita.', 'info');
+    }
+
+    function redoAction() {
+      if (!state.future.length) return;
+      state.history.push({
+        products: JSON.parse(JSON.stringify(state.products)),
+        tripDays: state.tripDays
+      });
+      const next = state.future.pop();
+      state.products = next.products;
+      state.tripDays = next.tripDays;
+      updateUndoRedoButtons();
+      renderAll();
+      showToast('Alteração refeita.', 'info');
+    }
+
+    function updateUndoRedoButtons() {
+      const btnUndo = document.getElementById('btnUndo');
+      const btnRedo = document.getElementById('btnRedo');
+      if (btnUndo) btnUndo.disabled = state.history.length === 0;
+      if (btnRedo) btnRedo.disabled = state.future.length === 0;
+    }
+
+    /* ===================================================================== */
+    /* RENDERIZAÇÃO DO GRÁFICO DE BARRAS HORIZONTAIS (0 A 3.000)             */
+    /* ===================================================================== */
+
+    function renderHorizontalBarChart() {
+      const container = document.getElementById('horizontalBarChart');
+      if (!container) return;
+
+      const multiplier = PERIOD_PRESETS[state.period]?.salesMultiplier || 1;
+      const ticks = [0, 500, 1000, 1500, 2000, 2500, 3000];
+      const maxAxis = 3000;
+
+      const items = state.products.map((p) => ({
+        ...p,
+        displaySales: Math.min(maxAxis, Math.round(p.sales * multiplier))
+      }));
+
+      const totalSales = items.reduce((acc, item) => acc + item.displaySales, 0) || 1;
+
+      let rowsHTML = items
+        .map((item) => {
+          const widthPct = Math.min(100, (item.displaySales / maxAxis) * 100);
+          const sharePct = ((item.displaySales / totalSales) * 100).toFixed(1).replace('.', ',');
+          const estRevenue = formatCurrencyBRL(item.displaySales * (item.unitPrice || 5.5));
+
+          return `
+            <div
+              class="bar-row grid grid-cols-[130px_1fr] sm:grid-cols-[175px_1fr] items-center gap-2.5 sm:gap-3 py-1.5 cursor-pointer group"
+              onmouseenter="showChartTooltip(event, '${item.name.replace(/'/g, "\\'")}', ${item.displaySales}, '${sharePct}%', '${estRevenue}', '${item.color}')"
+              onmousemove="moveChartTooltip(event)"
+              onmouseleave="hideChartTooltip()"
+              onclick="openEditStockModal(${item.id})"
+            >
+              <!-- Rótulo do Produto à esquerda -->
+              <div class="text-right text-[12.5px] sm:text-[13px] font-medium text-[#202124] truncate pr-0.5 group-hover:text-[#1A73E8] transition-colors">
+                ${item.name}
+              </div>
+
+              <!-- Área da barra com linhas de grade verticais -->
+              <div class="relative h-[26px] sm:h-[28px] flex items-center">
+                <!-- Linhas de grade verticais nos 7 marcadores -->
+                <div class="absolute inset-0 flex justify-between pointer-events-none">
+                  ${ticks
+                    .map(
+                      (t, idx) =>
+                        `<span class="h-full border-l ${
+                          idx === 0 ? 'border-[#9AA0A6]' : 'border-[#E0E0E0]'
+                        }"></span>`
+                    )
+                    .join('')}
+                </div>
+
+                <!-- Barra horizontal colorida -->
+                <div
+                  class="bar-fill relative z-10 h-[22px] sm:h-[24px] rounded-r-[2px]"
+                  style="width: ${widthPct}%; background-color: ${item.color};"
+                ></div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Eixo X com marcadores 0, 0.500, 1.000, 1.500, 2.000, 2.500, 3.000
+      const axisHTML = `
+        <div class="grid grid-cols-[130px_1fr] sm:grid-cols-[175px_1fr] items-start gap-2.5 sm:gap-3 mt-1">
+          <div></div>
+          <div class="relative border-t border-[#9AA0A6] pt-1.5">
+            <div class="flex justify-between text-[11px] sm:text-[12px] text-[#3C4043] tabular-nums">
+              ${ticks
+                .map((t, idx) => {
+                  const label = t === 0 ? '0' : formatDotNumber(t);
+                  const alignClass =
+                    idx === 0
+                      ? 'translate-x-0'
+                      : idx === ticks.length - 1
+                      ? 'translate-x-0'
+                      : '-translate-x-1/2';
+                  return `<span class="inline-block ${alignClass}">${label}</span>`;
+                })
+                .join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = rowsHTML + axisHTML;
+    }
+
+    /* Tooltip interativo do gráfico */
+    function showChartTooltip(event, name, units, share, revenue, color) {
+      const tooltip = document.getElementById('chartTooltip');
+      if (!tooltip) return;
+      document.getElementById('tooltipDot').style.backgroundColor = color;
+      document.getElementById('tooltipTitle').textContent = name;
+      document.getElementById('tooltipUnits').textContent = `${formatDotNumber(units)} un.`;
+      document.getElementById('tooltipShare').textContent = share;
+      document.getElementById('tooltipRevenue').textContent = revenue;
+      tooltip.classList.remove('hidden');
+      moveChartTooltip(event);
+    }
+
+    function moveChartTooltip(event) {
+      const tooltip = document.getElementById('chartTooltip');
+      if (!tooltip || tooltip.classList.contains('hidden')) return;
+      const offset = 14;
+      let left = event.clientX + offset;
+      let top = event.clientY + offset;
+      if (left + 220 > window.innerWidth) {
+        left = event.clientX - 220;
+      }
+      if (top + 115 > window.innerHeight) {
+        top = event.clientY - 115;
+      }
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+
+    function hideChartTooltip() {
+      const tooltip = document.getElementById('chartTooltip');
+      if (tooltip) tooltip.classList.add('hidden');
+    }
+
+    /* ===================================================================== */
+    /* RENDERIZAÇÃO DA TABELA: PREVISÃO DE REPOSIÇÃO DE ESTOQUE              */
+    /* ===================================================================== */
+
+    function renderReplenishmentTable() {
+      const tbody = document.getElementById('replenishmentTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = state.products
+        .map((item, idx) => {
+          return `
+            <tr
+              onclick="openEditStockModal(${item.id})"
+              title="Clique para editar estoque ou giro diário de ${item.name}"
+              class="hover:bg-[#F8FAFD] cursor-pointer transition-colors group"
+            >
+              <td class="py-2.5 pr-2 text-[#3C4043] tabular-nums">${idx + 1}.</td>
+              <td class="py-2.5 px-2 font-normal text-[#202124] group-hover:text-[#1A73E8] transition-colors">
+                ${item.name}
+              </td>
+              <td class="py-2.5 px-3 text-right tabular-nums text-[#202124]">
+                ${formatDotNumber(item.stock)}
+              </td>
+              <td class="py-2.5 px-3 text-right tabular-nums text-[#202124]">
+                ${formatCommaDecimal(item.turnover)}
+              </td>
+              <td class="py-2.5 px-3 text-right tabular-nums text-[#202124]">
+                ${item.daysLeft}
+              </td>
+              <td class="py-2.5 pl-3 pr-1">
+                ${getStatusBadgeHTML(item.status)}
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    /* ===================================================================== */
+    /* RENDERIZAÇÃO DOS CARTÕES KPI E LOGÍSTICA LIMEIRA (MG)                 */
+    /* ===================================================================== */
+
+    function renderKPIsAndLogistics() {
+      const preset = PERIOD_PRESETS[state.period] || PERIOD_PRESETS.mes_atual;
+
+      document.getElementById('kpiFaturamento').textContent = preset.faturamento;
+      document.getElementById('kpiFaturamentoDelta').textContent = preset.faturamentoDelta;
+      document.getElementById('kpiVendasOnline').textContent = preset.vendasOnline;
+      document.getElementById('kpiPedidos').textContent = preset.pedidos;
+
+      // Calcula giro médio dinâmico caso o usuário altere o giro dos produtos
+      const initialAvgTurnover =
+        INITIAL_PRODUCTS.reduce((acc, p) => acc + p.turnover, 0) / INITIAL_PRODUCTS.length;
+      const currentAvgTurnover =
+        state.products.reduce((acc, p) => acc + p.turnover, 0) / state.products.length;
+      const ratio = currentAvgTurnover / initialAvgTurnover;
+      const dynamicGiro = (preset.giroBase * ratio).toFixed(1);
+      document.getElementById('kpiGiro').textContent = `${dynamicGiro}x`;
+
+      // Comparativos opcionais (botão Comparar)
+      const cmpOnline = document.getElementById('kpiVendasOnlineCompare');
+      const cmpPedidos = document.getElementById('kpiPedidosCompare');
+      const cmpGiro = document.getElementById('kpiGiroCompare');
+
+      cmpOnline.textContent = preset.vendasOnlineCompare;
+      cmpPedidos.textContent = preset.pedidosCompare;
+      cmpGiro.textContent = preset.giroCompare;
+
+      [cmpOnline, cmpPedidos, cmpGiro].forEach((el) => {
+        if (state.compareMode) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // Cartão Logística Limeira (MG)
+      const tripDisplay = document.getElementById('tripDaysDisplay');
+      const tripAlert = document.getElementById('tripDynamicAlert');
+      const tripAlertText = document.getElementById('tripDynamicAlertText');
+      const cfgTripInput = document.getElementById('cfgTripDays');
+
+      tripDisplay.textContent = `${state.tripDays} ${state.tripDays === 1 ? 'dia' : 'dias'}`;
+      if (cfgTripInput) cfgTripInput.value = state.tripDays;
+
+      // Verifica se algum item crítico ou com dias restantes menores que a viagem precisa de atenção extra
+      const urgentBeforeTrip = state.products.filter((p) => p.daysLeft < state.tripDays);
+      if (state.tripDays !== 12 && urgentBeforeTrip.length > 0) {
+        tripAlert.classList.remove('hidden');
+        tripAlertText.textContent = `${urgentBeforeTrip.length} produto(s) têm cobertura menor que ${state.tripDays} dias antes da viagem.`;
+      } else {
+        tripAlert.classList.add('hidden');
+      }
+    }
+
+    /* ===================================================================== */
+    /* RENDERIZAÇÃO DAS ABAS SECUNDÁRIAS (ANÁLISE, VISUALIZAÇÃO, ESTOQUE)    */
+    /* ===================================================================== */
+
+    function renderSecondaryViews() {
+      // Aba Análise
+      const analiseContainer = document.getElementById('analiseProductBreakdown');
+      if (analiseContainer) {
+        const totalUnits = state.products.reduce((s, p) => s + p.sales, 0) || 1;
+        analiseContainer.innerHTML = state.products
+          .map((p) => {
+            const pct = ((p.sales / totalUnits) * 100).toFixed(1);
+            return `
+              <div>
+                <div class="flex justify-between text-xs font-medium text-[#202124] mb-1">
+                  <span>${p.name}</span>
+                  <span class="tabular-nums">${formatDotNumber(p.sales)} un. (${pct.replace('.', ',')}%)</span>
+                </div>
+                <div class="w-full h-2.5 bg-[#F1F3F4] rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" style="width: ${pct}%; background-color: ${p.color};"></div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      // Aba Visualização
+      const coverageContainer = document.getElementById('coverageChartContainer');
+      if (coverageContainer) {
+        const maxDays = 45;
+        coverageContainer.innerHTML = state.products
+          .map((p) => {
+            const pct = Math.min(100, (p.daysLeft / maxDays) * 100);
+            const tripLinePct = Math.min(100, (state.tripDays / maxDays) * 100);
+            return `
+              <div class="p-3 rounded-lg border border-[#E8EAED] bg-[#F8F9FA]">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="text-sm font-medium text-[#202124]">${p.name}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[#5F6368] tabular-nums">${p.daysLeft} dias restantes</span>
+                    ${getStatusBadgeHTML(p.status)}
+                  </div>
+                </div>
+                <div class="relative w-full h-4 bg-white border border-[#DADCE0] rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-300" style="width: ${pct}%; background-color: ${p.color};"></div>
+                  <div
+                    title="Próxima viagem Limeira (MG): ${state.tripDays} dias"
+                    class="absolute top-0 bottom-0 w-0.5 bg-[#202124]"
+                    style="left: ${tripLinePct}%;"
+                  ></div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      // Aba Estoque
+      renderStockView();
+    }
+
+    function renderStockView() {
+      const tbody = document.getElementById('fullStockTableBody');
+      if (!tbody) return;
+
+      const query = (document.getElementById('stockSearchInput')?.value || '').toLowerCase().trim();
+      const filtered = state.products.filter((p) => {
+        const matchesQuery = p.name.toLowerCase().includes(query);
+        const matchesStatus = state.stockFilter === 'all' || p.status === state.stockFilter;
+        return matchesQuery && matchesStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-8 text-center text-sm text-[#5F6368]">
+              Nenhum produto encontrado para o filtro selecionado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered
+        .map(
+          (item, index) => `
+          <tr class="hover:bg-[#F8FAFD] transition-colors">
+            <td class="py-2.5 px-2 text-[#5F6368] tabular-nums">${index + 1}.</td>
+            <td class="py-2.5 px-2 font-medium text-[#202124]">${item.name}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums">${formatDotNumber(item.sales)}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums font-medium">${formatDotNumber(item.stock)}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums">${formatCommaDecimal(item.turnover)}</td>
+            <td class="py-2.5 px-3 text-right tabular-nums">${item.daysLeft}</td>
+            <td class="py-2.5 px-3">${getStatusBadgeHTML(item.status)}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button
+                type="button"
+                onclick="openEditStockModal(${item.id})"
+                class="px-2.5 py-1 text-xs font-medium text-[#1A73E8] bg-[#E8F0FE] hover:bg-[#D2E3FC] rounded transition-colors"
+              >
+                Repor / Editar
+              </button>
+            </td>
+          </tr>
+        `
+        )
+        .join('');
+    }
+
+    function setStockFilter(filterKey) {
+      state.stockFilter = filterKey;
+      document.querySelectorAll('.filter-pill').forEach((btn) => {
+        if (btn.dataset.filter === filterKey) {
+          btn.className = 'filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#1A73E8] text-white';
+        } else {
+          btn.className = 'filter-pill px-3 py-1 rounded-full text-xs font-medium bg-[#F1F3F4] text-[#3C4043] hover:bg-[#E8EAED]';
+        }
+      });
+      renderStockView();
+    }
+
+    /* ===================================================================== */
+    /* CONTROLES DE INTERAÇÃO DO DASHBOARD                                   */
+    /* ===================================================================== */
+
+    function renderAll() {
+      renderKPIsAndLogistics();
+      renderHorizontalBarChart();
+      renderReplenishmentTable();
+      renderSecondaryViews();
+    }
+
+    /* Alternância de Período no Cabeçalho */
+    const periodBtn = document.getElementById('periodDropdownBtn');
+    const periodMenu = document.getElementById('periodDropdownMenu');
+
+    if (periodBtn && periodMenu) {
+      periodBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        periodMenu.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', () => {
+        periodMenu.classList.add('hidden');
+      });
+    }
+
+    function setPeriod(periodKey) {
+      state.period = periodKey;
+      const preset = PERIOD_PRESETS[periodKey];
+      document.getElementById('periodBadge').textContent = preset.label;
+
+      document.querySelectorAll('.period-option').forEach((opt) => {
+        const check = opt.querySelector('.check-icon');
+        if (opt.dataset.period === periodKey) {
+          check.classList.remove('hidden');
+        } else {
+          check.classList.add('hidden');
+        }
+      });
+
+      periodMenu.classList.add('hidden');
+      renderAll();
+      showToast(`Período atualizado: ${preset.label}`, 'info');
+    }
+
+    /* Alternância Editar / View */
+    function setMode(mode) {
+      state.mode = mode;
+      const btnEdit = document.getElementById('btnEditMode');
+      const btnView = document.getElementById('btnViewMode');
+      const banner = document.getElementById('editModeBanner');
+      const canvas = document.getElementById('mainCanvas');
+      const toolbar = document.getElementById('secondaryToolbar');
+
+      if (mode === 'edit') {
+        btnEdit.className =
+          'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-sm font-medium rounded-l-md border border-[#1A73E8] bg-[#1A73E8] text-white transition-colors';
+        btnView.className =
+          'inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 text-sm font-medium rounded-md border border-[#DADCE0] bg-white text-[#3C4043] hover:bg-[#F1F3F4] transition-colors';
+        banner.classList.remove('hidden');
+        canvas.classList.add('is-editing');
+        toolbar.classList.remove('hidden');
+      } else {
+        btnEdit.className =
+          'inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-sm font-medium rounded-l-md border border-[#DADCE0] bg-white text-[#1A73E8] hover:bg-[#F8FAFD] transition-colors';
+        btnView.className =
+          'inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 text-sm font-medium rounded-md bg-[#1A73E8] text-white hover:bg-[#1557B0] shadow-xs transition-colors';
+        banner.classList.add('hidden');
+        canvas.classList.remove('is-editing');
+      }
+    }
+
+    function toggleToolbarVisibility() {
+      const toolbar = document.getElementById('secondaryToolbar');
+      toolbar.classList.toggle('hidden');
+    }
+
+    /* Botão Comparar */
+    function toggleCompareMode() {
+      state.compareMode = !state.compareMode;
+      const btn = document.getElementById('btnCompare');
+      if (state.compareMode) {
+        btn.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-medium bg-[#E8F0FE] text-[#1A73E8] border border-[#D2E3FC] transition-colors shrink-0';
+        showToast('Comparativo com período anterior ativado nos cartões KPI.', 'info');
+      } else {
+        btn.className =
+          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-medium text-[#3C4043] hover:bg-[#F1F3F4] border border-transparent transition-colors shrink-0';
+      }
+      renderKPIsAndLogistics();
+    }
+
+    /* Ajuste de dias até a viagem Limeira (MG) */
+    function adjustTripDays(delta) {
+      pushHistorySnapshot();
+      state.tripDays = Math.max(1, Math.min(90, state.tripDays + delta));
+      renderKPIsAndLogistics();
+      renderSecondaryViews();
+    }
+
+    function updateTripDaysFromConfig(val) {
+      const parsed = parseInt(val, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 90) {
+        pushHistorySnapshot();
+        state.tripDays = parsed;
+        renderAll();
+        showToast(`Prazo da próxima viagem atualizado para ${parsed} dias.`, 'success');
+      }
+    }
+
+    /* Navegação da Barra Lateral */
+    function navigateTo(viewKey) {
+      state.activeNav = viewKey;
+      const views = ['dashboard', 'analise', 'visualizacao', 'estoque', 'configuracoes'];
+      views.forEach((v) => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) {
+          el.classList.toggle('hidden', v !== viewKey);
+        }
+      });
+
+      document.querySelectorAll('.nav-item').forEach((btn) => {
+        const icon = btn.querySelector('svg');
+        if (btn.dataset.nav === viewKey) {
+          btn.className =
+            'nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium bg-[#E8F0FE] text-[#1A73E8] transition-colors';
+          if (icon) icon.classList.remove('text-[#5F6368]');
+        } else {
+          btn.className =
+            'nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] text-[#3C4043] hover:bg-[#F1F3F4] transition-colors';
+          if (icon) icon.classList.add('text-[#5F6368]');
+        }
+      });
+
+      closeMobileSidebar();
+    }
+
+    /* Recolher / Expandir Sidebar Desktop */
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('leftSidebar');
+      const chevron = document.getElementById('sidebarCollapseChevron');
+      const arrow = document.getElementById('sidebarBackArrow');
+      state.sidebarCollapsed = !state.sidebarCollapsed;
+
+      if (state.sidebarCollapsed) {
+        sidebar.classList.remove('w-[216px]');
+        sidebar.classList.add('w-[64px]');
+        document.querySelectorAll('.sidebar-label').forEach((el) => el.classList.add('hidden'));
+        if (chevron) chevron.classList.add('rotate-180');
+        if (arrow) arrow.classList.add('rotate-180');
+      } else {
+        sidebar.classList.remove('w-[64px]');
+        sidebar.classList.add('w-[216px]');
+        document.querySelectorAll('.sidebar-label').forEach((el) => el.classList.remove('hidden'));
+        if (chevron) chevron.classList.remove('rotate-180');
+        if (arrow) arrow.classList.remove('rotate-180');
+      }
+    }
+
+    /* Sidebar Mobile */
+    const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
+    if (mobileSidebarBtn) {
+      mobileSidebarBtn.addEventListener('click', () => {
+        const sidebar = document.getElementById('leftSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      });
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('leftSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    /* ===================================================================== */
+    /* MODAL RÁPIDO DE REPOSIÇÃO E AJUSTE DE ESTOQUE                         */
+    /* ===================================================================== */
+
+    function openEditStockModal(productId) {
+      const product = state.products.find((p) => p.id === productId);
+      if (!product) return;
+
+      document.getElementById('editProductId').value = product.id;
+      document.getElementById('modalProductName').textContent = product.name;
+      document.getElementById('inputEstoqueAtual').value = product.stock;
+      document.getElementById('inputGiroDiario').value = product.turnover.toFixed(2);
+      document.getElementById('inputStatusOverride').value = 'auto';
+
+      updateModalPreview(product.status, product.daysLeft);
+      document.getElementById('editStockModal').classList.remove('hidden');
+    }
+
+    function closeEditStockModal() {
+      document.getElementById('editStockModal').classList.add('hidden');
+    }
+
+    function quickAddUnits(units) {
+      const input = document.getElementById('inputEstoqueAtual');
+      const current = parseInt(input.value, 10) || 0;
+      input.value = current + units;
+      updateModalPreview();
+    }
+
+    function updateModalPreview(initialStatus = null, initialDays = null) {
+      const stock = Math.max(0, parseInt(document.getElementById('inputEstoqueAtual').value, 10) || 0);
+      const turnover = Math.max(0.01, parseFloat(document.getElementById('inputGiroDiario').value) || 0.1);
+      const override = document.getElementById('inputStatusOverride').value;
+
+      const computedDays = initialDays !== null ? initialDays : Math.max(1, Math.round(stock / turnover));
+      const resolvedStatus =
+        override !== 'auto'
+          ? override
+          : initialStatus !== null
+          ? initialStatus
+          : computeStatusFromDays(computedDays);
+
+      document.getElementById('modalPreviewDays').textContent = `${computedDays} ${
+        computedDays === 1 ? 'dia' : 'dias'
+      }`;
+      document.getElementById('modalPreviewBadge').innerHTML = getStatusBadgeHTML(resolvedStatus);
+    }
+
+    function saveStockUpdate(event) {
+      event.preventDefault();
+      const id = parseInt(document.getElementById('editProductId').value, 10);
+      const newStock = Math.max(0, parseInt(document.getElementById('inputEstoqueAtual').value, 10) || 0);
+      const newTurnover = Math.max(0.01, parseFloat(document.getElementById('inputGiroDiario').value) || 0.1);
+      const override = document.getElementById('inputStatusOverride').value;
+
+      const product = state.products.find((p) => p.id === id);
+      if (!product) return;
+
+      pushHistorySnapshot();
+
+      const newDaysLeft = Math.max(1, Math.round(newStock / newTurnover));
+      const newStatus = override !== 'auto' ? override : computeStatusFromDays(newDaysLeft);
+
+      product.stock = newStock;
+      product.turnover = Number(newTurnover.toFixed(2));
+      product.daysLeft = newDaysLeft;
+      product.status = newStatus;
+
+      closeEditStockModal();
+      renderAll();
+      showToast(`Estoque de "${product.name}" atualizado (${newStock} un. • ${newDaysLeft} dias).`, 'success');
+    }
+
+    /* ===================================================================== */
+    /* MODAL + PRODUTO                                                       */
+    /* ===================================================================== */
+
+    function openAddProductModal() {
+      document.getElementById('addProductModal').classList.remove('hidden');
+      document.getElementById('newProdName').focus();
+    }
+
+    function closeAddProductModal() {
+      document.getElementById('addProductModal').classList.add('hidden');
+    }
+
+    function handleAddProduct(event) {
+      event.preventDefault();
+      const name = document.getElementById('newProdName').value.trim();
+      const sales = Math.max(1, Math.min(3000, parseInt(document.getElementById('newProdSales').value, 10) || 500));
+      const stock = Math.max(1, parseInt(document.getElementById('newProdStock').value, 10) || 100);
+      const turnover = Math.max(0.05, parseFloat(document.getElementById('newProdTurnover').value) || 0.5);
+      const color = document.getElementById('newProdColor').value;
+
+      if (!name) return;
+
+      pushHistorySnapshot();
+
+      const daysLeft = Math.max(1, Math.round(stock / turnover));
+      const status = computeStatusFromDays(daysLeft);
+      const nextId = state.products.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+
+      state.products.push({
+        id: nextId,
+        name,
+        sales,
+        color,
+        stock,
+        turnover: Number(turnover.toFixed(2)),
+        daysLeft,
+        status,
+        unitPrice: 5.5
+      });
+
+      document.getElementById('addProductForm').reset();
+      closeAddProductModal();
+      renderAll();
+      showToast(`Produto "${name}" adicionado ao dashboard!`, 'success');
+    }
+
+    /* ===================================================================== */
+    /* EXPORTAÇÃO REAL PARA CSV                                              */
+    /* ===================================================================== */
+
+    function exportTableToCSV() {
+      const headers = ['#', 'Produto', 'Vendas Mensais (un.)', 'Estoque Atual', 'Giro Diário', 'Dias Restantes', 'Status'];
+      const rows = state.products.map((p, idx) => [
+        idx + 1,
+        `"${p.name.replace(/"/g, '""')}"`,
+        p.sales,
+        p.stock,
+        formatCommaDecimal(p.turnover),
+        p.daysLeft,
+        `"${getStatusPlainLabel(p.status)}"`
+      ]);
+
+      const csvContent =
+        '\uFEFF' +
+        [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'previsao_reposicao_universo_da_limpeza.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('Arquivo CSV exportado com sucesso!', 'success');
+    }
+
+    /* ===================================================================== */
+    /* RESTAURAR DADOS ORIGINAIS E MODAIS DE APOIO                           */
+    /* ===================================================================== */
+
+    function resetToDefaultData() {
+      pushHistorySnapshot();
+      state.products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+      state.tripDays = 12;
+      state.period = 'mes_atual';
+      document.getElementById('periodBadge').textContent = 'Mês Atual';
+      renderAll();
+      showToast('Dados originais do relatório restaurados.', 'info');
+    }
+
+    function openHelpModal() {
+      document.getElementById('helpModal').classList.remove('hidden');
+    }
+
+    function closeHelpModal() {
+      document.getElementById('helpModal').classList.add('hidden');
+    }
+
+    /* Sistema elegante de notificações Toast */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const dotColor = type === 'success' ? 'bg-[#1E8E3E]' : 'bg-[#1A73E8]';
+      toast.className =
+        'pointer-events-auto flex items-center gap-2.5 bg-[#202124] text-white text-xs sm:text-sm px-4 py-2.5 rounded-lg shadow-lg transition-all duration-200 opacity-0 translate-y-2';
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full ${dotColor} shrink-0"></span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 220);
+      }, 3200);
+    }
+
+    /* Inicialização ao carregar a janela */
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>

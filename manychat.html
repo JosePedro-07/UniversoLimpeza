@@ -1,0 +1,2469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universo da Limpeza — Central de Automação & IA</title>
+  <!-- Fonte Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              blue: '#0F4C81',
+              blueDark: '#0B3A63',
+              blueLight: '#EBF3FA',
+              teal: '#00A896',
+              tealDark: '#008B7C',
+              tealLight: '#E6F6F4',
+              bg: '#F4F7FA',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estilização refinada de barras de rolagem e animações suaves */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    @keyframes pulseDot {
+      0%, 80%, 100% { transform: scale(0.65); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .typing-dot {
+      animation: pulseDot 1.3s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast-enter {
+      animation: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Padrão sutil estilo chat profissional */
+    .chat-wallpaper {
+      background-color: #F8FAFC;
+      background-image: radial-gradient(#CBD5E1 0.65px, transparent 0.65px);
+      background-size: 16px 16px;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Barra Unificada do Ecossistema (Exclusiva para Administrador Logado) -->
+  <nav id="adminSuiteSwitcher" class="hidden bg-[#020617] text-slate-50 border-b border-slate-800 py-2 px-4 text-xs">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#22c55e]"></span>
+        <strong class="font-bold">Ecossistema Universo da Limpeza</strong>
+        <span id="adminSuiteUserBadge" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">Admin Autenticado</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <a href="index.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">🛒 1. Loja &amp; Gestão Caixa</a>
+        <a href="erp.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">📦 2. UniGestão ERP &amp; PDV</a>
+        <a href="bi.html" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white font-semibold transition">📊 3. Looker Studio BI</a>
+        <a href="manychat.html" class="px-3 py-1 rounded-lg bg-teal-700 border border-teal-500 text-white font-semibold transition">🤖 4. ManyChat IA &amp; CRM</a>
+        <button type="button" onclick="window.ulLogoutAdmin()" class="ml-2 px-2.5 py-1 rounded-lg bg-rose-950/80 hover:bg-rose-800 border border-rose-800 text-rose-200 font-semibold transition cursor-pointer">🔒 Sair Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- GUARDA DE SEGURANÇA: BLOQUEIA ACESSO DE CLIENTES E NÃO-AUTENTICADOS -->
+  <style>
+    body.ul-locked > *:not(#ulSecurityGate) { display: none !important; }
+  </style>
+  <div id="ulSecurityGate" class="fixed inset-0 z-[9999] bg-slate-950 text-slate-100 flex items-center justify-center p-4" style="display:none;">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center text-xl">🔒</div>
+        <div>
+          <h2 class="text-base font-bold text-white">Acesso Restrito ao Administrador</h2>
+          <p class="text-xs text-slate-400">Área protegida do Ecossistema Universo da Limpeza</p>
+        </div>
+      </div>
+      <div id="ulGateAlert" class="bg-amber-950/50 border border-amber-800/70 rounded-xl p-3 text-xs text-amber-200 leading-relaxed">
+        Este módulo interno (ERP, BI ou Automação ManyChat) é exclusivo para administradores autenticados. Clientes têm acesso apenas à loja virtual para realização de pedidos.
+      </div>
+      <form onsubmit="window.ulGateLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail do Administrador</label>
+          <input id="ulGateEmail" type="email" value="admin@universolimpeza.com.br" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-teal-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Senha Administrativa</label>
+          <input id="ulGatePass" type="password" value="admin123" required class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:outline-none focus:border-teal-500" />
+        </div>
+        <p id="ulGateError" class="hidden text-xs text-rose-400 font-semibold"></p>
+        <div class="flex flex-col sm:flex-row gap-2 pt-2">
+          <button type="submit" class="flex-1 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition cursor-pointer">Autenticar como Admin</button>
+          <a href="index.html" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold text-center transition">← Voltar à Loja</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function() {
+      const SESSION_KEY = 'ul_auth_session_v1';
+      function getSession() {
+        try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; }
+      }
+      function checkAccess() {
+        const sess = getSession();
+        const isAdmin = Boolean(sess && (sess.role === 'admin' || sess.perfil === 'admin'));
+        const gate = document.getElementById('ulSecurityGate');
+        const bar = document.getElementById('adminSuiteSwitcher');
+        if (isAdmin) {
+          document.body.classList.remove('ul-locked');
+          if (gate) gate.style.display = 'none';
+          if (bar) {
+            bar.classList.remove('hidden');
+            const badge = document.getElementById('adminSuiteUserBadge');
+            if (badge && (sess.nome || sess.name)) badge.textContent = 'Admin: ' + (sess.nome || sess.name);
+          }
+        } else {
+          document.body.classList.add('ul-locked');
+          if (gate) gate.style.display = 'flex';
+          if (bar) bar.classList.add('hidden');
+          const alertBox = document.getElementById('ulGateAlert');
+          if (sess && (sess.role === 'cliente' || sess.role === 'customer' || sess.perfil === 'cliente') && alertBox) {
+            alertBox.innerHTML = '<strong>Acesso Negado para Conta de Cliente (' + (sess.nome || sess.name || 'Cliente') + '):</strong> Sua conta possui permissão apenas para fazer pedidos na loja. Faça login com uma conta de Administrador para acessar o ecossistema.';
+          }
+        }
+      }
+      window.ulGateLogin = function(e) {
+        e.preventDefault();
+        const email = document.getElementById('ulGateEmail').value.trim().toLowerCase();
+        const pass = document.getElementById('ulGatePass').value;
+        const err = document.getElementById('ulGateError');
+        if ((email === 'joana@universolimpeza.com.br' || email === 'admin@universolimpeza.com.br') && pass === 'admin123') {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({
+            role: 'admin',
+            perfil: 'admin',
+            nome: 'Joana (Administração)',
+            email: email,
+            loggedAt: Date.now()
+          }));
+          err.classList.add('hidden');
+          checkAccess();
+        } else {
+          err.textContent = 'Credenciais inválidas. Apenas administradores autorizados podem acessar este módulo.';
+          err.classList.remove('hidden');
+        }
+      };
+      window.ulLogoutAdmin = function() {
+        localStorage.removeItem(SESSION_KEY);
+        window.location.href = 'index.html';
+      };
+      checkAccess();
+      window.addEventListener('storage', checkAccess);
+    })();
+  </script>
+
+
+  <!-- ===================================================================== -->
+  <!-- CABEÇALHO PRINCIPAL & INDICADORES (KPIs)                              -->
+  <!-- ===================================================================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        
+        <!-- Identidade Visual da Loja -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-teal flex items-center justify-center text-white shadow-md shadow-brand-blue/20 shrink-0">
+              <!-- Ícone de Brilho / Limpeza -->
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h1 class="text-base sm:text-lg font-bold text-brand-blue tracking-tight leading-tight">
+                  Universo da Limpeza — Central de Automação & IA
+                </h1>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-tealLight text-brand-tealDark border border-brand-teal/20">
+                  <span class="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse"></span>
+                  Meta Official API
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Automação Omnichannel (WhatsApp Business & Instagram Direct) com Agente IA Consultivo
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs Rápidos + Controle Global do Bot -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 lg:gap-3">
+          
+          <!-- KPI 1: Status Global do Bot -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 block">Status do Bot</span>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span id="global-bot-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span id="global-bot-label" class="text-xs font-bold text-emerald-700">Ativo 24/7</span>
+              </div>
+            </div>
+            <button
+              id="btn-toggle-global-bot"
+              onclick="toggleGlobalBot()"
+              title="Ativar ou Pausar toda a automação"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-brand-teal transition-colors duration-200 ease-in-out focus:outline-none"
+            >
+              <span id="global-bot-knob" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out translate-x-5"></span>
+            </button>
+          </div>
+
+          <!-- KPI 2: Atendimentos Automatizados -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-brand-blueLight text-brand-blue flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 block">Atendimentos IA</span>
+              <span id="kpi-ai-replies" class="text-sm font-extrabold text-brand-blue">148</span>
+            </div>
+          </div>
+
+          <!-- KPI 3: Leads Capturados -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-brand-tealLight text-brand-tealDark flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-slate-500 block">Leads Capturados</span>
+              <span id="kpi-leads-count" class="text-sm font-extrabold text-slate-800">42</span>
+            </div>
+          </div>
+
+          <!-- KPI 4: Conformidade Meta API -->
+          <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-xl px-3 py-2 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-[11px] font-medium text-emerald-700 block">Conformidade Meta</span>
+              <span class="text-xs font-bold text-emerald-900">Janela 24h Ativa</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Barra de Navegação das 4 Abas -->
+      <nav class="flex items-center gap-1.5 mt-3.5 pt-2.5 border-t border-slate-100 overflow-x-auto no-scrollbar" aria-label="Abas do Sistema">
+        <button
+          onclick="switchTab('chat')"
+          id="tab-btn-chat"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-brand-blue text-white shadow-sm"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+          </svg>
+          1. Chat ao Vivo & Simulador
+        </button>
+
+        <button
+          onclick="switchTab('flows')"
+          id="tab-btn-flows"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          2. Fluxos & Regras (Gatilhos)
+        </button>
+
+        <button
+          onclick="switchTab('brain')"
+          id="tab-btn-brain"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          3. Cérebro da IA & Catálogo
+        </button>
+
+        <button
+          onclick="switchTab('crm')"
+          id="tab-btn-crm"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-600 hover:bg-slate-100"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          4. CRM & Leads Capturados
+          <span id="nav-crm-badge" class="ml-0.5 px-1.5 py-0.5 text-[10px] rounded-full bg-brand-tealLight text-brand-tealDark font-bold">5</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- CONTEÚDO PRINCIPAL                                                    -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 py-5">
+
+    <!-- =================================================================== -->
+    <!-- ABA 1: CHAT AO VIVO & SIMULADOR (WHATSAPP / INSTAGRAM)              -->
+    <!-- =================================================================== -->
+    <section id="view-chat" class="tab-view grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+      
+      <!-- Coluna Esquerda (3 cols): Lista de Conversas & Seletor de Canal -->
+      <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden max-h-[760px]">
+        <div class="p-3.5 border-b border-slate-100 bg-slate-50/70">
+          <div class="flex items-center justify-between mb-2.5">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Caixa de Entrada</h2>
+            <button
+              onclick="createNewSimulatedLead()"
+              class="text-xs font-semibold text-brand-blue hover:text-brand-teal flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs transition"
+              title="Iniciar nova simulação de cliente"
+            >
+              <span>+ Novo Teste</span>
+            </button>
+          </div>
+          <!-- Filtro rápido de canal na lista -->
+          <div class="grid grid-cols-3 gap-1 bg-slate-200/70 p-1 rounded-xl text-[11px] font-semibold">
+            <button onclick="setInboxFilter('all')" id="inbox-filter-all" class="inbox-filter-btn py-1.5 rounded-lg bg-white text-brand-blue shadow-2xs">Todos</button>
+            <button onclick="setInboxFilter('whatsapp')" id="inbox-filter-whatsapp" class="inbox-filter-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900">WhatsApp</button>
+            <button onclick="setInboxFilter('instagram')" id="inbox-filter-instagram" class="inbox-filter-btn py-1.5 rounded-lg text-slate-600 hover:text-slate-900">Instagram</button>
+          </div>
+        </div>
+
+        <!-- Lista de Contatos -->
+        <div id="chat-contacts-list" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+
+      <!-- Coluna Central (6 cols): Área de Conversa Interativa -->
+      <div class="lg:col-span-6 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden h-[720px] lg:h-[760px]">
+        
+        <!-- Topo do Chat: Info do Contato + Seletor Canal + Botão Modo IA vs Humano -->
+        <div class="p-3.5 border-b border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div id="active-chat-avatar" class="w-10 h-10 rounded-full bg-brand-blue text-white font-bold flex items-center justify-center text-sm shrink-0">
+              CM
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 id="active-chat-name" class="text-sm font-bold text-slate-900">Camila Mendes</h3>
+                <!-- Seletor Interativo de Canal (WhatsApp Business vs Instagram Direct) -->
+                <div class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-[11px] font-semibold">
+                  <button
+                    onclick="switchActiveChannel('whatsapp')"
+                    id="channel-btn-whatsapp"
+                    class="px-2 py-0.5 rounded-md transition flex items-center gap-1 bg-emerald-600 text-white"
+                  >
+                    <span>WhatsApp</span>
+                  </button>
+                  <button
+                    onclick="switchActiveChannel('instagram')"
+                    id="channel-btn-instagram"
+                    class="px-2 py-0.5 rounded-md transition flex items-center gap-1 text-slate-600 hover:text-slate-900"
+                  >
+                    <span>Instagram</span>
+                  </button>
+                </div>
+              </div>
+              <p id="active-chat-handle" class="text-xs text-slate-500">+55 (11) 98432-1190 • Cliente Residencial</p>
+            </div>
+          </div>
+
+          <!-- Botão Estilo ManyChat Live Chat: Modo IA Automático vs Assumir Conversa (Humano) -->
+          <div class="flex items-center gap-2 self-end sm:self-center">
+            <button
+              id="btn-toggle-takeover"
+              onclick="toggleChatAIMode()"
+              class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-xs border"
+            >
+              <!-- Preenchido via JS -->
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner de Status do Modo de Atendimento -->
+        <div id="chat-mode-banner" class="px-4 py-2 text-xs font-medium flex items-center justify-between bg-brand-tealLight/80 text-brand-tealDark border-b border-brand-teal/20">
+          <!-- Atualizado via JS -->
+        </div>
+
+        <!-- Área de Mensagens -->
+        <div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3.5 chat-wallpaper">
+          <!-- Mensagens renderizadas via JS -->
+        </div>
+
+        <!-- Indicador de Digitando (IA Processando) -->
+        <div id="typing-indicator" class="hidden px-4 py-2 bg-white border-t border-slate-100 flex items-center gap-2.5 text-xs text-brand-blue font-medium">
+          <div class="flex items-center gap-1 bg-brand-blueLight px-2.5 py-1.5 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue typing-dot"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue typing-dot"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue typing-dot"></span>
+          </div>
+          <span>Agente IA Universo da Limpeza consultando catálogo e formulando resposta...</span>
+        </div>
+
+        <!-- Botões de Teste Rápido (Simulador de Cliente) -->
+        <div class="px-3.5 pt-2.5 pb-2 bg-slate-50 border-t border-slate-200">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-semibold text-slate-500 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Simular mensagem rápida do cliente:
+            </span>
+            <button onclick="clearCurrentChat()" class="text-[11px] text-slate-400 hover:text-rose-600 font-medium transition">
+              Limpar histórico
+            </button>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button onclick="sendQuickPrompt('Quero ver o catálogo')" class="shrink-0 text-xs bg-white hover:bg-brand-blueLight text-brand-blue border border-slate-200 hover:border-brand-blue/30 px-2.5 py-1.5 rounded-lg font-medium transition">
+              Quero ver o catálogo
+            </button>
+            <button onclick="sendQuickPrompt('Qual produto tira gordura pesada de cozinha?')" class="shrink-0 text-xs bg-white hover:bg-brand-blueLight text-brand-blue border border-slate-200 hover:border-brand-blue/30 px-2.5 py-1.5 rounded-lg font-medium transition">
+              Qual produto tira gordura pesada de cozinha?
+            </button>
+            <button onclick="sendQuickPrompt('Vocês entregam hoje?')" class="shrink-0 text-xs bg-white hover:bg-brand-blueLight text-brand-blue border border-slate-200 hover:border-brand-blue/30 px-2.5 py-1.5 rounded-lg font-medium transition">
+              Vocês entregam hoje?
+            </button>
+            <button onclick="sendQuickPrompt('Quero comprar para minha empresa')" class="shrink-0 text-xs bg-white hover:bg-brand-blueLight text-brand-blue border border-slate-200 hover:border-brand-blue/30 px-2.5 py-1.5 rounded-lg font-medium transition">
+              Quero comprar para minha empresa
+            </button>
+            <button onclick="sendQuickPrompt('LIMPEZA')" class="shrink-0 text-xs bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 px-2.5 py-1.5 rounded-lg font-medium transition">
+              Cupom IG: LIMPEZA
+            </button>
+          </div>
+        </div>
+
+        <!-- Campo de Envio de Mensagem -->
+        <form onsubmit="handleChatSubmit(event)" class="p-3 bg-white border-t border-slate-200 flex flex-col gap-2">
+          <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 font-medium">Enviando mensagem como:</span>
+              <div class="inline-flex rounded-lg bg-slate-100 p-0.5 font-semibold">
+                <button
+                  type="button"
+                  id="sender-role-customer"
+                  onclick="setSenderRole('customer')"
+                  class="px-2.5 py-0.5 rounded-md bg-brand-blue text-white transition"
+                >
+                  Cliente (Simular)
+                </button>
+                <button
+                  type="button"
+                  id="sender-role-agent"
+                  onclick="setSenderRole('agent')"
+                  class="px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition"
+                >
+                  Lojista (Humano)
+                </button>
+              </div>
+            </div>
+            <span id="sender-hint" class="text-slate-400 hidden sm:inline">Testa a resposta automática da IA</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              id="chat-input"
+              placeholder="Digite como se fosse o cliente (ex: Preciso limpar piso pós-obra)..."
+              class="flex-1 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+              autocomplete="off"
+            />
+            <button
+              type="submit"
+              class="bg-brand-blue hover:bg-brand-blueDark text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-1.5 transition shadow-xs shrink-0"
+            >
+              <span>Enviar</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Coluna Direita (3 cols): Painel Lateral do Contato (Estilo ManyChat) -->
+      <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col justify-between max-h-[760px] overflow-y-auto">
+        <div class="space-y-4">
+          <!-- Cabeçalho do Inspetor -->
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Ficha do Contato</span>
+            <span id="sidebar-status-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-tealLight text-brand-tealDark">
+              IA Ativa
+            </span>
+          </div>
+
+          <!-- Cartão de Perfil -->
+          <div class="flex items-center gap-3">
+            <div id="sidebar-avatar" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-blue to-brand-teal text-white font-bold flex items-center justify-center text-base shrink-0">
+              CM
+            </div>
+            <div class="min-w-0">
+              <h4 id="sidebar-name" class="text-sm font-bold text-slate-900 truncate">Camila Mendes</h4>
+              <p id="sidebar-contact-info" class="text-xs text-slate-500 truncate">+55 (11) 98432-1190</p>
+              <p id="sidebar-channel-text" class="text-[11px] font-semibold text-emerald-600 mt-0.5">Via WhatsApp Business</p>
+            </div>
+          </div>
+
+          <!-- Cronômetro da Janela de 24h da Meta -->
+          <div class="bg-slate-50 border border-slate-200/90 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-brand-teal" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Janela de 24h Meta API
+              </span>
+              <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">Aberta</span>
+            </div>
+            <div id="meta-window-timer" class="text-lg font-mono font-extrabold text-brand-blue tracking-tight">
+              23:58:14
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1 leading-snug">
+              Reinicia automaticamente a cada mensagem recebida do cliente (Política oficial Meta).
+            </p>
+          </div>
+
+          <!-- Etiquetas (Tags) Aplicadas Automaticamente -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700">Etiquetas (Tags)</span>
+              <span class="text-[11px] text-slate-400">Auto & Manual</span>
+            </div>
+            <div id="sidebar-tags-container" class="flex flex-wrap gap-1.5 mb-2.5">
+              <!-- Tags renderizadas via JS -->
+            </div>
+            <form onsubmit="addManualTag(event)" class="flex items-center gap-1.5">
+              <input
+                type="text"
+                id="manual-tag-input"
+                placeholder="+ Nova tag (ex: #VIP)"
+                class="flex-1 text-xs rounded-lg border border-slate-200 px-2.5 py-1.5 focus:outline-none focus:border-brand-teal"
+              />
+              <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-brand-blue hover:text-white text-slate-700 text-xs font-semibold transition">
+                Add
+              </button>
+            </form>
+          </div>
+
+          <!-- Resumo do Interesse Detectado -->
+          <div class="bg-brand-blueLight/60 border border-brand-blue/15 rounded-xl p-3">
+            <span class="text-[11px] font-bold text-brand-blue block mb-1">Resumo de Interesse (IA)</span>
+            <p id="sidebar-interest-summary" class="text-xs text-slate-700 leading-relaxed">
+              Busca produtos para limpeza residencial e orçamento de entrega rápida.
+            </p>
+          </div>
+        </div>
+
+        <!-- Ações Rápidas do Contato -->
+        <div class="pt-4 mt-4 border-t border-slate-100 space-y-2">
+          <button
+            onclick="markLeadCompleted()"
+            class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Marcar Pedido / Atendimento Concluído
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 2: FLUXOS & REGRAS (GATILHOS ESTILO MANYCHAT)                   -->
+    <!-- =================================================================== -->
+    <section id="view-flows" class="tab-view hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-brand-blue">Construtor de Fluxos & Gatilhos Automáticos</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Defina palavras-chave prioritárias (Gatilho ➔ Condição ➔ Ação + Etiqueta). Quando nenhuma regra exata é acionada, o <strong>Agente IA Universo da Limpeza</strong> assume automaticamente.
+          </p>
+        </div>
+        <button
+          onclick="openNewFlowModal()"
+          class="bg-brand-teal hover:bg-brand-tealDark text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-xs shrink-0 self-start sm:self-center"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Criar Nova Regra / Fluxo
+        </button>
+      </div>
+
+      <!-- Lista Visual de Fluxos (Estilo Nós Conectados ManyChat) -->
+      <div id="flows-list-container" class="space-y-4">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 3: CÉREBRO DA IA & CATÁLOGO DA LOJA                             -->
+    <!-- =================================================================== -->
+    <section id="view-brain" class="tab-view hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      
+      <!-- Coluna Esquerda (5 cols): Configurações da Loja e Personalidade da IA -->
+      <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-blueLight text-brand-blue flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-brand-blue">Cérebro da IA & Regras da Loja</h2>
+            <p class="text-xs text-slate-500">Tudo que você editar aqui atualiza a IA em tempo real.</p>
+          </div>
+        </div>
+
+        <form onsubmit="saveBrainConfig(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nome da Loja</label>
+            <input type="text" id="brain-store-name" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal" required />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Tom de Voz do Agente IA</label>
+            <div class="grid grid-cols-3 gap-2" id="tone-selector-group">
+              <button type="button" onclick="selectBrainTone('Consultivo')" data-tone="Consultivo" class="tone-btn p-2.5 rounded-xl border text-left transition">
+                <span class="block text-xs font-bold">Consultivo</span>
+                <span class="block text-[10px] opacity-80 mt-0.5">Explica uso e indica o kit</span>
+              </button>
+              <button type="button" onclick="selectBrainTone('Direto / Vendedor')" data-tone="Direto / Vendedor" class="tone-btn p-2.5 rounded-xl border text-left transition">
+                <span class="block text-xs font-bold">Vendedor</span>
+                <span class="block text-[10px] opacity-80 mt-0.5">Foco em fechar pedido</span>
+              </button>
+              <button type="button" onclick="selectBrainTone('Técnico')" data-tone="Técnico" class="tone-btn p-2.5 rounded-xl border text-left transition">
+                <span class="block text-xs font-bold">Técnico</span>
+                <span class="block text-[10px] opacity-80 mt-0.5">Diluição, pH e rendimento</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Horário de Funcionamento</label>
+            <input type="text" id="brain-hours" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal" required />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Regras de Entrega & Frete</label>
+            <textarea id="brain-delivery" rows="2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal" required></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Formas de Pagamento</label>
+            <textarea id="brain-payment" rows="2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal" required></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Instruções Especiais / Promoções</label>
+            <textarea id="brain-extra" rows="2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-brand-blue hover:bg-brand-blueDark text-white font-bold py-2.5 px-4 rounded-xl text-sm transition shadow-xs flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Salvar e Sincronizar Cérebro da IA
+          </button>
+        </form>
+      </div>
+
+      <!-- Coluna Direita (7 cols): Catálogo de Produtos & Equipamentos -->
+      <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+          <div>
+            <h2 class="text-base font-bold text-brand-blue">Catálogo Oficial da Loja</h2>
+            <p class="text-xs text-slate-500">A IA consulta esta lista para recomendar produtos, preços e modos de uso.</p>
+          </div>
+          <button
+            onclick="openProductModal()"
+            class="bg-brand-teal hover:bg-brand-tealDark text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shrink-0 self-start sm:self-center"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Adicionar Produto
+          </button>
+        </div>
+
+        <!-- Busca no Catálogo -->
+        <div class="relative">
+          <input
+            type="text"
+            id="catalog-search-input"
+            oninput="renderCatalog()"
+            placeholder="Buscar produto por nome, categoria ou indicação (ex: gordura, pós-obra, mop)..."
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3.5 py-2 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal"
+          />
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        <!-- Grid/Lista de Produtos -->
+        <div id="catalog-list-container" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1">
+          <!-- Renderizado via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 4: CRM & LEADS CAPTURADOS                                       -->
+    <!-- =================================================================== -->
+    <section id="view-crm" class="tab-view hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-brand-blue">CRM & Leads Capturados</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Acompanhe todos os clientes qualificados automaticamente pelo ManyChat / IA e abra qualquer conversa com 1 clique.
+            </p>
+          </div>
+
+          <!-- Filtros do CRM -->
+          <div class="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              id="crm-search-input"
+              oninput="renderCRM()"
+              placeholder="Filtrar nome ou tag..."
+              class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-teal"
+            />
+            <select
+              id="crm-status-filter"
+              onchange="renderCRM()"
+              class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal"
+            >
+              <option value="all">Todos os Status</option>
+              <option value="IA Ativa">IA Ativa</option>
+              <option value="Aguardando Humano">Aguardando Humano</option>
+              <option value="Concluído">Concluído</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabela Responsiva -->
+        <div class="overflow-x-auto mt-3">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-slate-50/70">
+                <th class="py-3 px-3 rounded-tl-xl">Cliente</th>
+                <th class="py-3 px-3">Canal</th>
+                <th class="py-3 px-3">Etiquetas (Tags)</th>
+                <th class="py-3 px-3">Resumo do Interesse</th>
+                <th class="py-3 px-3">Status</th>
+                <th class="py-3 px-3 text-right rounded-tr-xl">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="crm-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: CRIAR NOVA REGRA / FLUXO (ABA 2)                               -->
+  <!-- ===================================================================== -->
+  <div id="modal-new-flow" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-5 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-brand-blue">Criar Nova Regra de Automação</h3>
+        <button onclick="closeNewFlowModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">✕</button>
+      </div>
+      <form onsubmit="saveNewFlow(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Fluxo</label>
+          <input type="text" id="flow-name" placeholder="Ex: Promoção Pós-Obra" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Palavras-chave (separadas por vírgula)</label>
+            <input type="text" id="flow-keywords" placeholder="Ex: OBRA, CIMENTO, REJUNTE" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Condição de Canal</label>
+            <select id="flow-channel" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white">
+              <option value="all">Todos (WhatsApp & Instagram)</option>
+              <option value="whatsapp">Apenas WhatsApp Business</option>
+              <option value="instagram">Apenas Instagram Direct</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Etiqueta (Tag) Aplicada Automaticamente</label>
+          <input type="text" id="flow-tag" placeholder="Ex: #Pos_Obra" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mensagem de Resposta Automática</label>
+          <textarea id="flow-response" rows="3" placeholder="Digite a resposta imediata enviada ao cliente..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeNewFlowModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-teal hover:bg-brand-tealDark text-white text-xs font-bold">Ativar Regra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ADICIONAR / EDITAR PRODUTO NO CATÁLOGO (ABA 3)                 -->
+  <!-- ===================================================================== -->
+  <div id="modal-product" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-5 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="product-modal-title" class="text-base font-bold text-brand-blue">Adicionar Produto ao Catálogo</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">✕</button>
+      </div>
+      <form onsubmit="saveProduct(event)" class="space-y-3">
+        <input type="hidden" id="prod-id" />
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Produto / Equipamento</label>
+          <input type="text" id="prod-name" placeholder="Ex: Desengordurante Alcalino Ultra 5L" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Preço (R$)</label>
+            <input type="number" step="0.01" min="0" id="prod-price" placeholder="49.90" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Categoria</label>
+            <select id="prod-category" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white">
+              <option value="Cozinha & Pesada">Cozinha & Pesada</option>
+              <option value="Uso Geral">Uso Geral</option>
+              <option value="Pós-Obra">Pós-Obra</option>
+              <option value="Desinfecção">Desinfecção</option>
+              <option value="Equipamentos">Equipamentos</option>
+              <option value="Finalização">Finalização</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Indicação de Uso & Diluição (Instrução para a IA)</label>
+          <textarea id="prod-usage" rows="3" placeholder="Ex: Ideal para remover gordura pesada de coifas, fogões e pisos de cozinha. Diluição até 1:20." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" required></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blueDark text-white text-xs font-bold">Salvar Produto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Container de Notificações Toast (Sem uso de alert()) -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA DO SISTEMA, MOTOR DE FLUXOS & INTEGRAÇÃO GEMINI API            -->
+  <!-- ===================================================================== -->
+  <script>
+    // Chave vazia conforme instrução do ambiente Canvas (injetada automaticamente no runtime)
+    const apiKey = "";
+
+    // =========================================================================
+    // 1. ESTADO GLOBAL DA APLICAÇÃO
+    // =========================================================================
+    const appState = {
+      globalBotActive: true,
+      aiRepliesCount: 148,
+      baseLeadsOffset: 37, // Soma com os contatos ativos no CRM para KPI realista
+      activeTab: 'chat',
+      inboxFilter: 'all',
+      senderRole: 'customer', // 'customer' (simulador) ou 'agent' (lojista)
+      activeContactId: 'lead-1',
+
+      // Cérebro da IA (Aba 3)
+      brain: {
+        storeName: 'Universo da Limpeza',
+        tone: 'Consultivo', // 'Consultivo' | 'Direto / Vendedor' | 'Técnico'
+        hours: 'Segunda a Sexta das 08h às 18h | Sábado das 08h às 13h',
+        delivery: 'Entrega expressa no mesmo dia para pedidos confirmados até 14h (região metropolitana). Frete GRÁTIS acima de R$ 150,00. Taxa fixa de R$ 12,90 para pedidos menores.',
+        payment: 'Pix com 5% de desconto imediato, Cartão de Crédito em até 3x sem juros, ou Boleto faturado (15/30 dias) para compras B2B com CNPJ acima de R$ 300,00.',
+        extraInstructions: 'Sempre destaque o alto rendimento dos galões concentrados de 5L (economia de até 60% comparado ao mercado comum). Se o cliente vier do Instagram ou pedir cupom, valide o cupom LIMPA10 (10% OFF). Pergunte sempre se deseja fechar o pedido para entrega hoje.'
+      },
+
+      // Catálogo de Produtos (Aba 3)
+      catalog: [
+        {
+          id: 'prod-1',
+          name: 'Desengordurante Alcalino Ultra 5L',
+          price: 49.90,
+          category: 'Cozinha & Pesada',
+          inStock: true,
+          usage: 'Remove gordura pesada e carbonizada de coifas, fogões, fritadeiras, churrasqueiras e pisos de cozinha. Rendimento profissional com diluição de até 1:20.'
+        },
+        {
+          id: 'prod-2',
+          name: 'Detergente Neutro Concentrado 5L',
+          price: 32.00,
+          category: 'Uso Geral',
+          inStock: true,
+          usage: 'Limpeza diária segura para porcelanatos, pisos frios, bancadas, vidros e louças. pH neutro que não agride superfícies; rende até 100 litros diluídos.'
+        },
+        {
+          id: 'prod-3',
+          name: 'Limpa Pisos Pós-Obra 5L',
+          price: 58.00,
+          category: 'Pós-Obra',
+          inStock: true,
+          usage: 'Desincrustante ácido controlado ideal para remover respingos de cimento, rejunte, argamassa, gesso e terra impregnada em porcelanatos rústicos e pedras.'
+        },
+        {
+          id: 'prod-4',
+          name: 'Cloro Gel Ativo 2L',
+          price: 24.50,
+          category: 'Desinfecção',
+          inStock: true,
+          usage: 'Bactericida e alvejante de alta viscosidade que não escorre. Perfeito para branquear rejuntes, eliminar mofo em banheiros e higienizar áreas externas.'
+        },
+        {
+          id: 'prod-5',
+          name: 'Kit Mop Giratório Pro Inox',
+          price: 119.00,
+          category: 'Equipamentos',
+          inStock: true,
+          usage: 'Balde reforçado com cesto centrífuga em aço inox, cabo telescópico de 1,60m e 2 refis de microfibra de alta absorção para limpeza rápida sem contato manual.'
+        },
+        {
+          id: 'prod-6',
+          name: 'Limpador Perfumado Concentrado Lavanda 2L',
+          price: 28.90,
+          category: 'Finalização',
+          inStock: true,
+          usage: 'Fragrância concentrada de longa duração (até 24h) para finalização de pisos em residências, clínicas, escritórios e recepções. Rende até 50 litros.'
+        }
+      ],
+
+      // Fluxos & Regras Estilo ManyChat (Aba 2)
+      flows: [
+        {
+          id: 'flow-1',
+          name: 'Envio Instantâneo de Catálogo & Mais Vendidos',
+          enabled: true,
+          isFallback: false,
+          keywords: ['CATALOGO', 'CATÁLOGO', 'PRECO', 'PREÇO', 'TABELA'],
+          channel: 'all',
+          tag: '#Interesse_Catalogo',
+          dynamicCatalog: true,
+          responseText: 'Aqui está nossa seleção campeã de vendas na *Universo da Limpeza*! 🧼✨'
+        },
+        {
+          id: 'flow-2',
+          name: 'Automação Comentário / DM Instagram (Cupom 10%)',
+          enabled: true,
+          isFallback: false,
+          keywords: ['LIMPEZA', 'CUPOM', 'DESCONTO'],
+          channel: 'instagram',
+          tag: '#Lead_Instagram',
+          dynamicCatalog: false,
+          responseText: 'Que demais ter você por aqui pelo Instagram! 🎉 Como prometido, liberei seu cupom exclusivo: *LIMPA10* para ganhar *10% de desconto* em qualquer produto ou kit da loja.\n\nQual ambiente você precisa limpar hoje (cozinha, banheiro, piso pós-obra ou empresa)? Eu já monto o kit ideal para você!'
+        },
+        {
+          id: 'flow-3',
+          name: 'Triagem Corporativa & Atacado (B2B)',
+          enabled: true,
+          isFallback: false,
+          keywords: ['EMPRESA', 'ATACADO', 'CNPJ', 'CONDOMINIO', 'CONDOMÍNIO', 'RESTAURANTE'],
+          channel: 'all',
+          tag: '#Cliente_B2B',
+          dynamicCatalog: false,
+          responseText: 'Excelente! Temos uma linha profissional de galões concentrados de 5L com condição especial para empresas, condomínios e comércios 🏢✨.\n\nPara liberar nossa tabela atacado e faturamento no boleto, me informe por favor:\n1️⃣ *Segmento da empresa* (ex: restaurante, escritório, condomínio, clínica)\n2️⃣ *Principais itens que precisam* (desengordurante, neutro, cloro gel, equipamentos)\n3️⃣ *CNPJ* (opcional agora, mas agiliza o cadastro).'
+        },
+        {
+          id: 'flow-fallback',
+          name: 'Fallback Inteligente — Agente IA Universo da Limpeza',
+          enabled: true,
+          isFallback: true,
+          keywords: ['Qualquer mensagem livre / Dúvida técnica / Orçamento'],
+          channel: 'all',
+          tag: '#Atendimento_IA',
+          dynamicCatalog: false,
+          responseText: 'Aciona o modelo Gemini em tempo real com acesso completo ao Catálogo, Regras de Frete, Pagamento e Tom de Voz configurado.'
+        }
+      ],
+
+      // Contatos / Conversas / CRM (Abas 1 e 4)
+      contacts: [
+        {
+          id: 'lead-1',
+          name: 'Camila Mendes',
+          handle: '+55 (11) 98432-1190',
+          channel: 'whatsapp',
+          aiMode: true,
+          status: 'IA Ativa',
+          tags: ['#Residencial', '#Lead_Quente'],
+          interestSummary: 'Procurando produtos concentrados para limpeza geral e cozinha.',
+          windowExpiresAt: Date.now() + (23 * 3600 + 54 * 60 + 20) * 1000,
+          messages: [
+            {
+              id: 'm-1',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'Olá! Vi o anúncio de vocês, vocês vendem produtos concentrados de 5 litros?',
+              time: '10:14'
+            },
+            {
+              id: 'm-2',
+              sender: 'ai',
+              senderLabel: 'Agente IA • Gemini',
+              text: 'Olá, Camila! Seja muito bem-vinda à *Universo da Limpeza*! 🧼✨\n\nSim! Trabalhamos com linha profissional de galões concentrados de *5 Litros* que rendem até 100 litros diluídos, gerando uma economia de até 60%.\n\nOs nossos campeões de saída são:\n• *Detergente Neutro Concentrado 5L* — R$ 32,00 (ideal para pisos e uso diário)\n• *Desengordurante Alcalino Ultra 5L* — R$ 49,90 (remove gordura pesada sem esforço)\n\nPara qual tipo de limpeza você está buscando hoje?',
+              time: '10:14'
+            }
+          ]
+        },
+        {
+          id: 'lead-2',
+          name: '@rodrigo.construtora',
+          handle: '@rodrigo.construtora',
+          channel: 'instagram',
+          aiMode: true,
+          status: 'IA Ativa',
+          tags: ['#Pos_Obra', '#Lead_Instagram'],
+          interestSummary: 'Precisa remover respingos de rejunte e cimento em porcelanato.',
+          windowExpiresAt: Date.now() + (21 * 3600 + 18 * 60 + 45) * 1000,
+          messages: [
+            {
+              id: 'm-201',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'Oi, acabei uma reforma e ficou cheio de resto de rejunte no porcelanato. O que vocês indicam?',
+              time: '09:42'
+            },
+            {
+              id: 'm-202',
+              sender: 'ai',
+              senderLabel: 'Agente IA • Gemini',
+              text: 'Olá Rodrigo! Para limpeza pós-obra em porcelanato, a solução ideal é o nosso *Limpa Pisos Pós-Obra 5L (R$ 58,00)* 🧱✨.\n\nEle possui ação desincrustante controlada que dissolve respingos de cimento, argamassa e rejunte sem manchar o piso.\n\nQuantos m² aproximadamente você precisa limpar para eu calcular a quantidade ideal?',
+              time: '09:42'
+            }
+          ]
+        },
+        {
+          id: 'lead-3',
+          name: 'Restaurante Sabor & Brasa',
+          handle: '+55 (11) 99120-8844',
+          channel: 'whatsapp',
+          aiMode: false,
+          status: 'Aguardando Humano',
+          tags: ['#Cliente_B2B', '#Limpeza_Pesada'],
+          interestSummary: 'Cotação mensal de 6 galões de Desengordurante Ultra 5L + Cloro Gel.',
+          windowExpiresAt: Date.now() + (18 * 3600 + 40 * 60 + 10) * 1000,
+          messages: [
+            {
+              id: 'm-301',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'EMPRESA - Preciso de cotação mensal para cozinha industrial de restaurante.',
+              time: '08:50'
+            },
+            {
+              id: 'm-302',
+              sender: 'flow',
+              senderLabel: 'Fluxo Automático',
+              text: 'Excelente! Temos uma linha profissional de galões concentrados de 5L com condição especial para empresas, condomínios e comércios 🏢✨.\n\nPara liberar nossa tabela atacado e faturamento no boleto, me informe por favor:\n1️⃣ Segmento da empresa\n2️⃣ Principais itens que precisam\n3️⃣ CNPJ',
+              time: '08:50'
+            },
+            {
+              id: 'm-303',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'CNPJ 42.198.441/0001-90. Precisamos de 6 galões de Desengordurante 5L e 4 Cloro Gel 2L toda quinzena.',
+              time: '08:53'
+            }
+          ]
+        },
+        {
+          id: 'lead-4',
+          name: '@juliana.homedecor',
+          handle: '@juliana.homedecor',
+          channel: 'instagram',
+          aiMode: true,
+          status: 'IA Ativa',
+          tags: ['#Lead_Instagram', '#Equipamentos'],
+          interestSummary: 'Interesse no Kit Mop Giratório Pro Inox com cupom LIMPA10.',
+          windowExpiresAt: Date.now() + (22 * 3600 + 10 * 60 + 5) * 1000,
+          messages: [
+            {
+              id: 'm-401',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'LIMPEZA',
+              time: '11:05'
+            },
+            {
+              id: 'm-402',
+              sender: 'flow',
+              senderLabel: 'Fluxo Automático',
+              text: 'Que demais ter você por aqui pelo Instagram! 🎉 Como prometido, liberei seu cupom exclusivo: *LIMPA10* para ganhar *10% de desconto* em qualquer produto ou kit da loja.',
+              time: '11:05'
+            }
+          ]
+        },
+        {
+          id: 'lead-5',
+          name: 'Condomínio Parque das Árvores',
+          handle: '+55 (11) 97741-0029',
+          channel: 'whatsapp',
+          aiMode: true,
+          status: 'Concluído',
+          tags: ['#Cliente_B2B', '#Pedido_Fechado'],
+          interestSummary: 'Pedido fechado: R$ 245,80 (Detergente Neutro + Lavanda 2L + Cloro Gel).',
+          windowExpiresAt: Date.now() + (14 * 3600 + 25 * 60 + 50) * 1000,
+          messages: [
+            {
+              id: 'm-501',
+              sender: 'customer',
+              senderLabel: 'Cliente',
+              text: 'Pedido aprovado pelo síndico! Pode mandar o link do Pix.',
+              time: 'Ontem'
+            },
+            {
+              id: 'm-502',
+              sender: 'ai',
+              senderLabel: 'Agente IA • Gemini',
+              text: 'Perfeito! Pedido confirmado com 5% de desconto no Pix. Nossa entrega expressa sai hoje mesmo! Obrigado pela parceria com a Universo da Limpeza.',
+              time: 'Ontem'
+            }
+          ]
+        }
+      ]
+    };
+
+    // =========================================================================
+    // 2. UTILITÁRIOS DE UI & NOTIFICAÇÕES TOAST
+    // =========================================================================
+    function showToast(title, message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'border-emerald-500 bg-white text-slate-800',
+        info: 'border-brand-blue bg-white text-slate-800',
+        warning: 'border-amber-500 bg-white text-slate-800',
+        ai: 'border-brand-teal bg-white text-slate-800'
+      };
+      const icons = {
+        success: '✅',
+        info: 'ℹ️',
+        warning: '⚠️',
+        ai: '✨'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto border-l-4 ${colors[type] || colors.info} rounded-xl shadow-lg border border-slate-200/80 p-3.5 toast-enter flex items-start gap-2.5`;
+      toast.innerHTML = `
+        <span class="text-base leading-none mt-0.5">${icons[type] || '✨'}</span>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-bold text-slate-900">${escapeHTML(title)}</p>
+          <p class="text-[11px] text-slate-600 mt-0.5 leading-snug">${escapeHTML(message)}</p>
+        </div>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 3600);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Formata *negrito* e quebras de linha estilo WhatsApp/Instagram
+    function formatRichMessage(text) {
+      let safe = escapeHTML(text);
+      safe = safe.replace(/\*(.*?)\*/g, '<strong class="font-bold">$1</strong>');
+      safe = safe.replace(/\n/g, '<br>');
+      return safe;
+    }
+
+    function getCurrentTimeStr() {
+      const now = new Date();
+      return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getInitials(name) {
+      const clean = name.replace('@', '').trim();
+      const parts = clean.split(/[\s._-]+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return clean.slice(0, 2).toUpperCase();
+    }
+
+    function formatBRL(val) {
+      return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function getActiveContact() {
+      return appState.contacts.find(c => c.id === appState.activeContactId) || appState.contacts[0];
+    }
+
+    // =========================================================================
+    // 3. NAVEGAÇÃO ENTRE ABAS & KPIs GLOBAIS
+    // =========================================================================
+    function switchTab(tabName) {
+      appState.activeTab = tabName;
+
+      // Esconde todas as seções
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`view-${tabName}`);
+      if (target) target.classList.remove('hidden');
+
+      // Atualiza visual dos botões de aba
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-blue', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        activeBtn.classList.add('bg-brand-blue', 'text-white', 'shadow-sm');
+      }
+
+      // Renderiza dados atualizados da aba selecionada
+      if (tabName === 'chat') renderChatView();
+      if (tabName === 'flows') renderFlows();
+      if (tabName === 'brain') renderBrainAndCatalog();
+      if (tabName === 'crm') renderCRM();
+    }
+
+    function updateGlobalKPIs() {
+      document.getElementById('kpi-ai-replies').textContent = appState.aiRepliesCount;
+      const totalLeads = appState.baseLeadsOffset + appState.contacts.length;
+      document.getElementById('kpi-leads-count').textContent = totalLeads;
+      document.getElementById('nav-crm-badge').textContent = appState.contacts.length;
+
+      const dot = document.getElementById('global-bot-dot');
+      const label = document.getElementById('global-bot-label');
+      const btn = document.getElementById('btn-toggle-global-bot');
+      const knob = document.getElementById('global-bot-knob');
+
+      if (appState.globalBotActive) {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+        label.className = 'text-xs font-bold text-emerald-700';
+        label.textContent = 'Ativo 24/7';
+        btn.classList.remove('bg-slate-300');
+        btn.classList.add('bg-brand-teal');
+        knob.classList.remove('translate-x-0');
+        knob.classList.add('translate-x-5');
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        label.className = 'text-xs font-bold text-amber-700';
+        label.textContent = 'Pausado';
+        btn.classList.remove('bg-brand-teal');
+        btn.classList.add('bg-slate-300');
+        knob.classList.remove('translate-x-5');
+        knob.classList.add('translate-x-0');
+      }
+    }
+
+    function toggleGlobalBot() {
+      appState.globalBotActive = !appState.globalBotActive;
+      updateGlobalKPIs();
+      renderChatView();
+      showToast(
+        appState.globalBotActive ? 'Automação Global Ativada' : 'Automação Global Pausada',
+        appState.globalBotActive
+          ? 'O bot e a IA voltaram a responder automaticamente em todos os canais.'
+          : 'Todas as respostas automáticas foram suspensas temporariamente.',
+        appState.globalBotActive ? 'success' : 'warning'
+      );
+    }
+
+    // =========================================================================
+    // 4. ABA 1: CHAT AO VIVO, SIMULADOR & PAINEL LATERAL MANYCHAT
+    // =========================================================================
+    function setInboxFilter(filter) {
+      appState.inboxFilter = filter;
+      document.querySelectorAll('.inbox-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-brand-blue', 'shadow-2xs');
+        btn.classList.add('text-slate-600');
+      });
+      const active = document.getElementById(`inbox-filter-${filter}`);
+      if (active) {
+        active.classList.remove('text-slate-600');
+        active.classList.add('bg-white', 'text-brand-blue', 'shadow-2xs');
+      }
+      renderContactsList();
+    }
+
+    function selectContact(contactId) {
+      appState.activeContactId = contactId;
+      const contact = getActiveContact();
+      // Ajusta papel padrão de envio conforme modo do contato
+      if (!contact.aiMode) {
+        setSenderRole('agent', true);
+      } else {
+        setSenderRole('customer', true);
+      }
+      renderChatView();
+    }
+
+    function switchActiveChannel(channel) {
+      const contact = getActiveContact();
+      contact.channel = channel;
+      if (channel === 'instagram' && !contact.handle.startsWith('@')) {
+        contact.handle = '@' + contact.name.toLowerCase().replace(/[^a-z0-9]/g, '.').replace(/\.+/g, '.');
+      } else if (channel === 'whatsapp' && contact.handle.startsWith('@')) {
+        contact.handle = '+55 (11) 9' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000);
+      }
+      renderChatView();
+      showToast(
+        `Canal alterado para ${channel === 'whatsapp' ? 'WhatsApp Business' : 'Instagram Direct'}`,
+        'As regras de gatilho e o contexto da IA agora consideram este canal.',
+        'info'
+      );
+    }
+
+    function toggleChatAIMode() {
+      const contact = getActiveContact();
+      contact.aiMode = !contact.aiMode;
+      contact.status = contact.aiMode ? 'IA Ativa' : 'Aguardando Humano';
+
+      if (!contact.aiMode) {
+        setSenderRole('agent', true);
+        contact.messages.push({
+          id: 'sys-' + Date.now(),
+          sender: 'system',
+          senderLabel: 'Sistema ManyChat',
+          text: 'Atendente humano assumiu a conversa. Automação por IA pausada para este contato.',
+          time: getCurrentTimeStr()
+        });
+        showToast('Modo Humano Ativado', `Você assumiu o atendimento de ${contact.name}.`, 'warning');
+      } else {
+        setSenderRole('customer', true);
+        contact.messages.push({
+          id: 'sys-' + Date.now(),
+          sender: 'system',
+          senderLabel: 'Sistema ManyChat',
+          text: 'Modo IA Automático reativado. O Agente IA voltou a atender este contato.',
+          time: getCurrentTimeStr()
+        });
+        showToast('Modo IA Reativado', `O Agente IA voltou a responder ${contact.name}.`, 'ai');
+      }
+
+      renderChatView();
+    }
+
+    function setSenderRole(role, silent = false) {
+      appState.senderRole = role;
+      const btnCust = document.getElementById('sender-role-customer');
+      const btnAgent = document.getElementById('sender-role-agent');
+      const input = document.getElementById('chat-input');
+      const hint = document.getElementById('sender-hint');
+
+      if (role === 'customer') {
+        btnCust.className = 'px-2.5 py-0.5 rounded-md bg-brand-blue text-white transition';
+        btnAgent.className = 'px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+        input.placeholder = 'Digite como se fosse o cliente (ex: Preciso tirar gordura pesada da cozinha)...';
+        hint.textContent = 'Testa a resposta automática da IA';
+      } else {
+        btnAgent.className = 'px-2.5 py-0.5 rounded-md bg-brand-teal text-white transition';
+        btnCust.className = 'px-2.5 py-0.5 rounded-md text-slate-600 hover:text-slate-900 transition';
+        input.placeholder = 'Digite sua resposta manual como lojista da Universo da Limpeza...';
+        hint.textContent = 'Envio manual direto ao cliente';
+      }
+    }
+
+    function sendQuickPrompt(text) {
+      setSenderRole('customer', true);
+      const input = document.getElementById('chat-input');
+      input.value = text;
+      processIncomingOrOutgoingMessage(text);
+      input.value = '';
+    }
+
+    function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      processIncomingOrOutgoingMessage(text);
+    }
+
+    function clearCurrentChat() {
+      const contact = getActiveContact();
+      contact.messages = [
+        {
+          id: 'sys-' + Date.now(),
+          sender: 'system',
+          senderLabel: 'Sistema',
+          text: 'Histórico reiniciado. Envie uma mensagem ou use os botões de teste rápido abaixo.',
+          time: getCurrentTimeStr()
+        }
+      ];
+      renderChatView();
+    }
+
+    function createNewSimulatedLead() {
+      const names = [
+        { name: 'Fernanda Oliveira', handle: '+55 (11) 96512-3301', channel: 'whatsapp' },
+        { name: '@lucas.reformas', handle: '@lucas.reformas', channel: 'instagram' },
+        { name: 'Clínica Bem Estar', handle: '+55 (11) 98801-4412', channel: 'whatsapp' },
+        { name: '@padaria.paoquente', handle: '@padaria.paoquente', channel: 'instagram' }
+      ];
+      const pick = names[appState.contacts.length % names.length];
+      const newLead = {
+        id: 'lead-' + Date.now(),
+        name: pick.name,
+        handle: pick.handle,
+        channel: pick.channel,
+        aiMode: true,
+        status: 'IA Ativa',
+        tags: [pick.channel === 'instagram' ? '#Lead_Instagram' : '#Novo_Lead'],
+        interestSummary: 'Novo contato aguardando qualificação automática.',
+        windowExpiresAt: Date.now() + 24 * 3600 * 1000,
+        messages: [
+          {
+            id: 'sys-' + Date.now(),
+            sender: 'system',
+            senderLabel: 'Simulador',
+            text: `Nova sessão iniciada com ${pick.name} via ${pick.channel === 'whatsapp' ? 'WhatsApp Business' : 'Instagram Direct'}.`,
+            time: getCurrentTimeStr()
+          }
+        ]
+      };
+      appState.contacts.unshift(newLead);
+      appState.activeContactId = newLead.id;
+      setSenderRole('customer', true);
+      updateGlobalKPIs();
+      renderChatView();
+      showToast('Novo Lead Simulado Criado', `Conversando agora com ${newLead.name}.`, 'info');
+    }
+
+    function addManualTag(e) {
+      e.preventDefault();
+      const input = document.getElementById('manual-tag-input');
+      let tag = input.value.trim();
+      if (!tag) return;
+      if (!tag.startsWith('#')) tag = '#' + tag.replace(/\s+/g, '_');
+      const contact = getActiveContact();
+      if (!contact.tags.includes(tag)) {
+        contact.tags.push(tag);
+        renderContactSidebar();
+        renderContactsList();
+        showToast('Etiqueta Adicionada', `Tag ${tag} aplicada a ${contact.name}.`, 'info');
+      }
+      input.value = '';
+    }
+
+    function removeTag(tag) {
+      const contact = getActiveContact();
+      contact.tags = contact.tags.filter(t => t !== tag);
+      renderContactSidebar();
+      renderContactsList();
+    }
+
+    function markLeadCompleted() {
+      const contact = getActiveContact();
+      contact.status = 'Concluído';
+      if (!contact.tags.includes('#Pedido_Concluido')) {
+        contact.tags.push('#Pedido_Concluido');
+      }
+      renderChatView();
+      showToast('Atendimento Concluído', `Status de ${contact.name} atualizado no CRM.`, 'success');
+    }
+
+    // =========================================================================
+    // 5. MOTOR DE AUTOMAÇÃO (REGRAS MANYCHAT + GEMINI API)
+    // =========================================================================
+    async function processIncomingOrOutgoingMessage(text) {
+      const contact = getActiveContact();
+
+      // Caso 1: O lojista está enviando uma mensagem manual como atendente
+      if (appState.senderRole === 'agent') {
+        contact.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'agent',
+          senderLabel: 'Você (Lojista)',
+          text: text,
+          time: getCurrentTimeStr()
+        });
+        renderChatMessages();
+        renderContactsList();
+        return;
+      }
+
+      // Caso 2: Mensagem vinda do Cliente (Simulador)
+      // 1) Reinicia a janela oficial de 24h da Meta
+      contact.windowExpiresAt = Date.now() + 24 * 3600 * 1000;
+
+      // 2) Adiciona a mensagem do cliente na conversa
+      contact.messages.push({
+        id: 'msg-' + Date.now(),
+        sender: 'customer',
+        senderLabel: 'Cliente',
+        text: text,
+        time: getCurrentTimeStr()
+      });
+
+      // Move contato para o topo da lista
+      appState.contacts = [contact, ...appState.contacts.filter(c => c.id !== contact.id)];
+      renderChatView();
+
+      // Verifica se a automação global e individual estão ativas
+      if (!appState.globalBotActive) {
+        showToast('Bot Global Pausado', 'Ative o bot no cabeçalho para respostas automáticas.', 'warning');
+        return;
+      }
+
+      if (!contact.aiMode) {
+        showToast('Modo Humano Ativo', 'A IA está pausada nesta conversa. Responda como Lojista ou reative a IA.', 'warning');
+        return;
+      }
+
+      // 3) Verifica primeiro os Fluxos & Regras de Palavra-Chave (Estilo ManyChat)
+      const matchedFlow = matchKeywordFlow(text, contact.channel);
+      if (matchedFlow) {
+        showTyping(true);
+        await sleep(550); // Pequeno atraso natural de envio
+        showTyping(false);
+
+        let replyText = matchedFlow.responseText;
+        if (matchedFlow.dynamicCatalog) {
+          const items = appState.catalog
+            .filter(p => p.inStock)
+            .map(p => `• *${p.name}* — *${formatBRL(p.price)}*\n  _${p.usage}_`)
+            .join('\n\n');
+          replyText = `${matchedFlow.responseText}\n\n${items}\n\n🚚 *Entrega:* ${appState.brain.delivery}\n\nQual desses itens você gostaria de pedir hoje?`;
+        }
+
+        // Aplica etiqueta automática da regra
+        if (matchedFlow.tag && !contact.tags.includes(matchedFlow.tag)) {
+          contact.tags.push(matchedFlow.tag);
+        }
+        contact.interestSummary = `Acionou fluxo "${matchedFlow.name}" via ${contact.channel === 'whatsapp' ? 'WhatsApp' : 'Instagram'}.`;
+        contact.status = 'IA Ativa';
+
+        contact.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'flow',
+          senderLabel: `Fluxo • ${matchedFlow.name}`,
+          text: replyText,
+          time: getCurrentTimeStr()
+        });
+
+        appState.aiRepliesCount++;
+        updateGlobalKPIs();
+        renderChatView();
+        return;
+      }
+
+      // 4) Fallback Inteligente: Aciona a API do Gemini com o Cérebro da Loja e Catálogo
+      showTyping(true);
+      try {
+        const aiResult = await callGeminiAssistant(text, contact);
+        showTyping(false);
+
+        // Aplica tags sugeridas pela IA
+        if (aiResult.tags && aiResult.tags.length > 0) {
+          aiResult.tags.forEach(tag => {
+            if (!contact.tags.includes(tag)) contact.tags.push(tag);
+          });
+        }
+        if (aiResult.interestSummary) {
+          contact.interestSummary = aiResult.interestSummary;
+        }
+        contact.status = 'IA Ativa';
+
+        contact.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'ai',
+          senderLabel: 'Agente IA • Gemini',
+          text: aiResult.reply,
+          time: getCurrentTimeStr()
+        });
+
+        appState.aiRepliesCount++;
+        updateGlobalKPIs();
+        renderChatView();
+      } catch (err) {
+        showTyping(false);
+        const fallbackReply = generateSmartLocalFallback(text, contact);
+        contact.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'ai',
+          senderLabel: 'Agente IA • Universo da Limpeza',
+          text: fallbackReply,
+          time: getCurrentTimeStr()
+        });
+        appState.aiRepliesCount++;
+        updateGlobalKPIs();
+        renderChatView();
+      }
+    }
+
+    function matchKeywordFlow(messageText, channel) {
+      const normalized = messageText
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+      for (const flow of appState.flows) {
+        if (!flow.enabled || flow.isFallback) continue;
+        if (flow.channel !== 'all' && flow.channel !== channel) continue;
+
+        const hasMatch = flow.keywords.some(kw => {
+          const cleanKw = kw.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          if (!cleanKw) return false;
+          // Correspondência por palavra inteira ou frase contida
+          const regex = new RegExp(`(^|\\b|\\s)${escapeRegex(cleanKw)}(\\b|\\s|$|[?!.,])`, 'i');
+          return regex.test(normalized);
+        });
+
+        if (hasMatch) return flow;
+      }
+      return null;
+    }
+
+    function escapeRegex(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function showTyping(visible) {
+      const el = document.getElementById('typing-indicator');
+      if (visible) {
+        el.classList.remove('hidden');
+        const container = document.getElementById('chat-messages-container');
+        container.scrollTop = container.scrollHeight;
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 6. INTEGRAÇÃO COM A GEMINI API (gemini-3-flash-preview)
+    // =========================================================================
+    async function callGeminiAssistant(userMessage, contact) {
+      const catalogText = appState.catalog
+        .filter(item => item.inStock)
+        .map(item => `- ${item.name} (${item.category}): ${formatBRL(item.price)} | Indicação: ${item.usage}`)
+        .join('\n');
+
+      const toneDescriptions = {
+        'Consultivo': 'Seja acolhedor, especialista e consultivo: entenda a necessidade do cliente, explique brevemente como aplicar/diluir o produto com segurança e recomende a melhor solução.',
+        'Direto / Vendedor': 'Seja objetivo, persuasivo e focado em fechamento rápido: apresente o produto ideal, o preço, vantagem de entrega rápida e convide para fechar o pedido agora.',
+        'Técnico': 'Seja preciso e técnico: mencione características químicas (alcalino, neutro, desincrustante), fator de diluição, rendimento por litro e eficiência profissional.'
+      };
+
+      const systemInstruction = `
+Você é o Agente Oficial de Atendimento e Vendas com IA da loja "${appState.brain.storeName}".
+Você atende clientes pelo canal: ${contact.channel === 'whatsapp' ? 'WhatsApp Business' : 'Instagram Direct'}.
+
+DADOS E REGRAS DA LOJA:
+- Horário de Funcionamento: ${appState.brain.hours}
+- Regras de Entrega e Frete: ${appState.brain.delivery}
+- Formas de Pagamento: ${appState.brain.payment}
+- Instruções Adicionais e Cupons: ${appState.brain.extraInstructions}
+
+TOM DE VOZ ESCOLHIDO PELO LOJISTA (${appState.brain.tone}):
+${toneDescriptions[appState.brain.tone] || toneDescriptions['Consultivo']}
+
+CATÁLOGO ATUAL DE PRODUTOS DISPONÍVEIS:
+${catalogText}
+
+DIRETRIZES DE RESPOSTA:
+1. Responda sempre em Português do Brasil, de forma natural, clara e bem formatada para mensagens de celular (use *negrito* para nomes de produtos e preços, e tópicos curtos quando listar itens).
+2. Recomende apenas produtos reais do catálogo acima e informe os valores exatos.
+3. Sempre conduza a conversa para o próximo passo de venda (perguntar quantidade, CEP/bairro para entrega hoje ou forma de pagamento).
+4. Ao final da sua resposta, em uma nova linha isolada, adicione exatamente uma linha de metadados ocultos no formato:
+[[META: TAGS=#Tag1,#Tag2 | RESUMO=Resumo curto de 1 frase do interesse do cliente]]
+Use etiquetas relevantes como #Limpeza_Pesada, #Pos_Obra, #Lead_Quente, #Equipamentos, #Frete_Hoje, #Residencial.
+`.trim();
+
+      // Monta histórico recente da conversa para contexto contínuo
+      const recentHistory = contact.messages
+        .filter(m => m.sender === 'customer' || m.sender === 'ai' || m.sender === 'flow')
+        .slice(-8)
+        .map(m => ({
+          role: m.sender === 'customer' ? 'user' : 'model',
+          parts: [{ text: m.text }]
+        }));
+
+      const payload = {
+        contents: recentHistory.length > 0 ? recentHistory : [{ role: 'user', parts: [{ text: userMessage }] }],
+        systemInstruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        generationConfig: {
+          temperature: 0.65,
+          maxOutputTokens: 600
+        }
+      };
+
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      // Exponential backoff (1s, 2s, 4s)
+      const delays = [1000, 2000, 4000];
+      let lastError = null;
+
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const result = await response.json();
+          const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) {
+            throw new Error('Resposta vazia da IA');
+          }
+
+          return parseGeminiMetadata(rawText);
+        } catch (err) {
+          lastError = err;
+          if (attempt < delays.length) {
+            await sleep(delays[attempt]);
+          }
+        }
+      }
+
+      throw lastError;
+    }
+
+    // Extrai tags e resumo da linha [[META: ...]] e limpa o texto final ao cliente
+    function parseGeminiMetadata(rawText) {
+      let cleanReply = rawText.trim();
+      let extractedTags = ['#Atendimento_IA'];
+      let interestSummary = '';
+
+      const metaRegex = /\[\[META:\s*TAGS=([^|\]]+)(?:\|\s*RESUMO=([^\]]+))?\]\]/i;
+      const match = cleanReply.match(metaRegex);
+
+      if (match) {
+        cleanReply = cleanReply.replace(metaRegex, '').trim();
+        if (match[1]) {
+          extractedTags = match[1]
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean)
+            .map(t => (t.startsWith('#') ? t : '#' + t.replace(/\s+/g, '_')));
+        }
+        if (match[2]) {
+          interestSummary = match[2].trim();
+        }
+      }
+
+      return {
+        reply: cleanReply,
+        tags: extractedTags,
+        interestSummary
+      };
+    }
+
+    // Fallback inteligente caso a API esteja indisponível no ambiente
+    function generateSmartLocalFallback(userText, contact) {
+      const lower = userText.toLowerCase();
+      if (lower.includes('gordura') || lower.includes('cozinha') || lower.includes('fogao') || lower.includes('fogão')) {
+        const prod = appState.catalog.find(p => p.name.toLowerCase().includes('desengordurante')) || appState.catalog[0];
+        if (!contact.tags.includes('#Limpeza_Pesada')) contact.tags.push('#Limpeza_Pesada');
+        contact.interestSummary = 'Busca remoção de gordura pesada na cozinha.';
+        return `Para gordura pesada de cozinha, eu recomendo o nosso campeão de vendas: *${prod.name}* por *${formatBRL(prod.price)}*! 🔥🧼\n\n${prod.usage}\n\n${appState.brain.delivery}\n\nQuantos galões você gostaria de separar para entrega?`;
+      }
+      if (lower.includes('entrega') || lower.includes('hoje') || lower.includes('frete')) {
+        if (!contact.tags.includes('#Lead_Quente')) contact.tags.push('#Lead_Quente');
+        contact.interestSummary = 'Consultando prazo de entrega rápida e frete.';
+        return `Sobre nossas entregas: ${appState.brain.delivery} 🚚💨\n\nAceitamos ${appState.brain.payment}\n\nMe diga quais produtos você precisa que já confirmo o envio para hoje!`;
+      }
+      if (lower.includes('obra') || lower.includes('cimento') || lower.includes('rejunte')) {
+        const prod = appState.catalog.find(p => p.name.toLowerCase().includes('pós-obra')) || appState.catalog[2];
+        if (!contact.tags.includes('#Pos_Obra')) contact.tags.push('#Pos_Obra');
+        return `Para limpeza pós-obra, a solução ideal é o *${prod.name}* (*${formatBRL(prod.price)}*). ${prod.usage}\n\nDeseja incluir no seu pedido hoje?`;
+      }
+
+      return `Olá! Aqui é o assistente da *${appState.brain.storeName}* 🧼✨.\n\nTemos soluções profissionais para limpeza pesada, pós-obra, uso diário e equipamentos como o *Kit Mop Giratório Pro Inox*.\n\n${appState.brain.delivery}\n\nQual área ou tipo de sujeira você precisa limpar hoje?`;
+    }
+
+    // =========================================================================
+    // 7. RENDERIZAÇÃO DA ABA 1 (CHAT, CONTATOS & SIDEBAR)
+    // =========================================================================
+    function renderChatView() {
+      renderContactsList();
+      renderChatHeaderAndBanner();
+      renderChatMessages();
+      renderContactSidebar();
+    }
+
+    function renderContactsList() {
+      const container = document.getElementById('chat-contacts-list');
+      const filtered = appState.contacts.filter(c => {
+        if (appState.inboxFilter === 'all') return true;
+        return c.channel === appState.inboxFilter;
+      });
+
+      container.innerHTML = filtered.map(c => {
+        const isSelected = c.id === appState.activeContactId;
+        const lastMsg = c.messages[c.messages.length - 1];
+        const preview = lastMsg ? lastMsg.text.replace(/\*/g, '') : 'Sem mensagens';
+        const isWA = c.channel === 'whatsapp';
+
+        return `
+          <button
+            onclick="selectContact('${c.id}')"
+            class="w-full text-left p-3.5 transition flex items-start gap-3 ${isSelected ? 'bg-brand-blueLight/75 border-l-4 border-brand-blue' : 'hover:bg-slate-50'}"
+          >
+            <div class="relative shrink-0">
+              <div class="w-10 h-10 rounded-full ${isSelected ? 'bg-brand-blue text-white' : 'bg-slate-200 text-slate-700'} font-bold text-xs flex items-center justify-center">
+                ${getInitials(c.name)}
+              </div>
+              <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white shadow-2xs ${isWA ? 'bg-emerald-500' : 'bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600'}">
+                ${isWA ? 'W' : 'IG'}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-bold text-slate-900 truncate">${escapeHTML(c.name)}</span>
+                <span class="text-[10px] text-slate-400 shrink-0">${lastMsg ? lastMsg.time : ''}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 truncate mt-0.5">${escapeHTML(preview)}</p>
+              <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${c.aiMode ? 'bg-brand-tealLight text-brand-tealDark' : 'bg-amber-100 text-amber-800'}">
+                  ${c.aiMode ? '🤖 IA Ativa' : '👤 Humano'}
+                </span>
+                ${c.tags.slice(0, 1).map(t => `<span class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-slate-100 text-slate-600">${escapeHTML(t)}</span>`).join('')}
+              </div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderChatHeaderAndBanner() {
+      const contact = getActiveContact();
+      document.getElementById('active-chat-avatar').textContent = getInitials(contact.name);
+      document.getElementById('active-chat-name').textContent = contact.name;
+      document.getElementById('active-chat-handle').textContent = `${contact.handle} • ${contact.channel === 'whatsapp' ? 'WhatsApp Business API' : 'Instagram Direct API'}`;
+
+      // Seletor de canal
+      const btnWA = document.getElementById('channel-btn-whatsapp');
+      const btnIG = document.getElementById('channel-btn-instagram');
+      if (contact.channel === 'whatsapp') {
+        btnWA.className = 'px-2 py-0.5 rounded-md transition flex items-center gap-1 bg-emerald-600 text-white shadow-2xs';
+        btnIG.className = 'px-2 py-0.5 rounded-md transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
+      } else {
+        btnIG.className = 'px-2 py-0.5 rounded-md transition flex items-center gap-1 bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-2xs';
+        btnWA.className = 'px-2 py-0.5 rounded-md transition flex items-center gap-1 text-slate-600 hover:text-slate-900';
+      }
+
+      // Botão Modo IA vs Assumir Conversa (Humano)
+      const btnTakeover = document.getElementById('btn-toggle-takeover');
+      const banner = document.getElementById('chat-mode-banner');
+
+      if (contact.aiMode) {
+        btnTakeover.className = 'px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-xs border bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300';
+        btnTakeover.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span>Assumir Conversa (Humano)</span>
+        `;
+        banner.className = 'px-4 py-2 text-xs font-medium flex items-center justify-between bg-brand-tealLight/80 text-brand-tealDark border-b border-brand-teal/20';
+        banner.innerHTML = `
+          <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-brand-teal animate-pulse"></span>
+            <strong>Modo IA Automático Ativo:</strong> Fluxos e Agente Gemini respondem instantaneamente.
+          </span>
+          <span class="text-[11px] font-semibold hidden sm:inline">Tom: ${escapeHTML(appState.brain.tone)}</span>
+        `;
+      } else {
+        btnTakeover.className = 'px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-xs border bg-brand-teal hover:bg-brand-tealDark text-white border-brand-teal';
+        btnTakeover.innerHTML = `
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Reativar IA Automática</span>
+        `;
+        banner.className = 'px-4 py-2 text-xs font-medium flex items-center justify-between bg-amber-50 text-amber-900 border-b border-amber-200';
+        banner.innerHTML = `
+          <span class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <strong>Atendimento Manual (Live Chat):</strong> Automação pausada para este contato.
+          </span>
+          <span class="text-[11px] font-semibold">Você está no controle</span>
+        `;
+      }
+    }
+
+    function renderChatMessages() {
+      const contact = getActiveContact();
+      const container = document.getElementById('chat-messages-container');
+
+      container.innerHTML = contact.messages.map(msg => {
+        if (msg.sender === 'system') {
+          return `
+            <div class="flex justify-center">
+              <span class="px-3 py-1 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium text-center">
+                ${escapeHTML(msg.text)}
+              </span>
+            </div>
+          `;
+        }
+
+        const isCustomer = msg.sender === 'customer';
+        if (isCustomer) {
+          return `
+            <div class="flex flex-col items-start max-w-[85%]">
+              <span class="text-[10px] font-semibold text-slate-500 ml-1 mb-0.5">${escapeHTML(contact.name)} • ${msg.time}</span>
+              <div class="bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-xs sm:text-sm shadow-2xs leading-relaxed">
+                ${formatRichMessage(msg.text)}
+              </div>
+            </div>
+          `;
+        }
+
+        // Mensagem da Loja (IA, Fluxo Automático ou Atendente Humano)
+        const isFlow = msg.sender === 'flow';
+        const isHuman = msg.sender === 'agent';
+        const bubbleColors = isHuman
+          ? 'bg-slate-800 text-white'
+          : isFlow
+          ? 'bg-brand-blue text-white'
+          : 'bg-gradient-to-br from-brand-blue to-[#0D5C8A] text-white';
+
+        const badgeStyle = isHuman
+          ? 'bg-slate-200 text-slate-700'
+          : isFlow
+          ? 'bg-blue-100 text-brand-blue'
+          : 'bg-brand-tealLight text-brand-tealDark';
+
+        return `
+          <div class="flex flex-col items-end ml-auto max-w-[85%]">
+            <div class="flex items-center gap-1.5 mr-1 mb-0.5">
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${badgeStyle}">
+                ${escapeHTML(msg.senderLabel)}
+              </span>
+              <span class="text-[10px] text-slate-400">${msg.time}</span>
+            </div>
+            <div class="${bubbleColors} rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs sm:text-sm shadow-xs leading-relaxed">
+              ${formatRichMessage(msg.text)}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function renderContactSidebar() {
+      const contact = getActiveContact();
+      document.getElementById('sidebar-avatar').textContent = getInitials(contact.name);
+      document.getElementById('sidebar-name').textContent = contact.name;
+      document.getElementById('sidebar-contact-info').textContent = contact.handle;
+      document.getElementById('sidebar-channel-text').textContent =
+        contact.channel === 'whatsapp' ? 'Via WhatsApp Business' : 'Via Instagram Direct';
+      document.getElementById('sidebar-channel-text').className =
+        contact.channel === 'whatsapp'
+          ? 'text-[11px] font-semibold text-emerald-600 mt-0.5'
+          : 'text-[11px] font-semibold text-pink-600 mt-0.5';
+
+      const pill = document.getElementById('sidebar-status-pill');
+      if (contact.status === 'Concluído') {
+        pill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700';
+        pill.textContent = 'Concluído';
+      } else if (contact.aiMode) {
+        pill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-tealLight text-brand-tealDark';
+        pill.textContent = 'IA Ativa';
+      } else {
+        pill.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800';
+        pill.textContent = 'Humano';
+      }
+
+      document.getElementById('sidebar-interest-summary').textContent = contact.interestSummary;
+
+      const tagsEl = document.getElementById('sidebar-tags-container');
+      tagsEl.innerHTML = contact.tags.map(tag => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-brand-blueLight text-brand-blue border border-brand-blue/15">
+          ${escapeHTML(tag)}
+          <button onclick="removeTag('${escapeHTML(tag)}')" class="hover:text-rose-600 ml-0.5 font-bold" title="Remover etiqueta">×</button>
+        </span>
+      `).join('');
+
+      updateMetaWindowTimerDisplay();
+    }
+
+    // Atualiza o cronômetro da Janela de 24h da Meta em tempo real
+    function updateMetaWindowTimerDisplay() {
+      const contact = getActiveContact();
+      const timerEl = document.getElementById('meta-window-timer');
+      if (!timerEl || !contact) return;
+
+      const remainingMs = Math.max(0, contact.windowExpiresAt - Date.now());
+      const totalSec = Math.floor(remainingMs / 1000);
+      const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const secs = String(totalSec % 60).padStart(2, '0');
+      timerEl.textContent = `${hrs}:${mins}:${secs}`;
+    }
+
+    setInterval(updateMetaWindowTimerDisplay, 1000);
+
+    // =========================================================================
+    // 8. RENDERIZAÇÃO & AÇÕES DA ABA 2 (FLUXOS & REGRAS MANYCHAT)
+    // =========================================================================
+    function renderFlows() {
+      const container = document.getElementById('flows-list-container');
+      container.innerHTML = appState.flows.map((flow, index) => {
+        const channelLabel =
+          flow.channel === 'whatsapp'
+            ? 'WhatsApp Business'
+            : flow.channel === 'instagram'
+            ? 'Instagram Direct'
+            : 'WhatsApp & Instagram';
+
+        return `
+          <div class="bg-white rounded-2xl border ${flow.enabled ? 'border-slate-200' : 'border-slate-200/60 opacity-70'} p-5 shadow-xs transition">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg ${flow.isFallback ? 'bg-brand-teal text-white' : 'bg-brand-blue text-white'} text-xs font-extrabold flex items-center justify-center">
+                  ${flow.isFallback ? 'IA' : index + 1}
+                </span>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">${escapeHTML(flow.name)}</h3>
+                  <span class="text-[11px] text-slate-500">${flow.isFallback ? 'Camada Inteligente (Gemini)' : 'Regra Prioritária por Palavra-Chave'}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2.5">
+                ${
+                  !flow.isFallback
+                    ? `<button onclick="deleteFlow('${flow.id}')" class="text-xs text-slate-400 hover:text-rose-600 font-medium px-2 py-1 rounded-lg transition">Excluir</button>`
+                    : ''
+                }
+                <button
+                  onclick="toggleFlow('${flow.id}')"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${flow.enabled ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}"
+                >
+                  ${flow.enabled ? '● Ativo' : '○ Desativado'}
+                </button>
+              </div>
+            </div>
+
+            <!-- Fluxograma Visual: Gatilho -> Condição -> Ação + Etiqueta -->
+            <div class="grid grid-cols-1 md:grid-cols-11 gap-3 items-center pt-4">
+              
+              <!-- Bloco 1: Gatilho -->
+              <div class="md:col-span-3 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">⚡ 1. Gatilho</span>
+                <div class="flex flex-wrap gap-1">
+                  ${flow.keywords.map(k => `<span class="px-2 py-0.5 rounded bg-white border border-amber-200 text-xs font-bold text-slate-800">${escapeHTML(k)}</span>`).join('')}
+                </div>
+              </div>
+
+              <!-- Seta -->
+              <div class="hidden md:flex md:col-span-1 justify-center text-slate-300 font-bold text-lg">➔</div>
+
+              <!-- Bloco 2: Condição -->
+              <div class="md:col-span-3 bg-brand-blueLight/60 border border-brand-blue/20 rounded-xl p-3">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-blue block mb-1">🔀 2. Condição</span>
+                <p class="text-xs font-semibold text-slate-800">Canal: ${channelLabel}</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Janela 24h Meta verificada</p>
+              </div>
+
+              <!-- Seta -->
+              <div class="hidden md:flex md:col-span-1 justify-center text-slate-300 font-bold text-lg">➔</div>
+
+              <!-- Bloco 3: Ação + Etiqueta -->
+              <div class="md:col-span-3 bg-brand-tealLight/60 border border-brand-teal/25 rounded-xl p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[10px] font-extrabold uppercase tracking-wider text-brand-tealDark">💬 3. Ação & Tag</span>
+                  <span class="px-2 py-0.5 rounded-full bg-white text-brand-blue text-[10px] font-bold border border-brand-blue/20">${escapeHTML(flow.tag)}</span>
+                </div>
+                <p class="text-xs text-slate-700 line-clamp-3 leading-relaxed">${escapeHTML(flow.responseText)}</p>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleFlow(flowId) {
+      const flow = appState.flows.find(f => f.id === flowId);
+      if (!flow) return;
+      flow.enabled = !flow.enabled;
+      renderFlows();
+      showToast(
+        flow.enabled ? 'Regra Ativada' : 'Regra Pausada',
+        `"${flow.name}" foi ${flow.enabled ? 'ativada' : 'desativada'}.`,
+        flow.enabled ? 'success' : 'warning'
+      );
+    }
+
+    function deleteFlow(flowId) {
+      appState.flows = appState.flows.filter(f => f.id !== flowId);
+      renderFlows();
+      showToast('Regra Removida', 'O fluxo foi excluído com sucesso.', 'info');
+    }
+
+    function openNewFlowModal() {
+      document.getElementById('modal-new-flow').classList.remove('hidden');
+    }
+
+    function closeNewFlowModal() {
+      document.getElementById('modal-new-flow').classList.add('hidden');
+    }
+
+    function saveNewFlow(e) {
+      e.preventDefault();
+      const name = document.getElementById('flow-name').value.trim();
+      const keywordsRaw = document.getElementById('flow-keywords').value;
+      const channel = document.getElementById('flow-channel').value;
+      let tag = document.getElementById('flow-tag').value.trim();
+      const responseText = document.getElementById('flow-response').value.trim();
+
+      if (!tag.startsWith('#')) tag = '#' + tag.replace(/\s+/g, '_');
+      const keywords = keywordsRaw.split(',').map(k => k.trim().toUpperCase()).filter(Boolean);
+
+      const newFlow = {
+        id: 'flow-' + Date.now(),
+        name,
+        enabled: true,
+        isFallback: false,
+        keywords,
+        channel,
+        tag,
+        dynamicCatalog: false,
+        responseText
+      };
+
+      // Insere antes do Fallback Inteligente
+      const fallbackIdx = appState.flows.findIndex(f => f.isFallback);
+      if (fallbackIdx >= 0) {
+        appState.flows.splice(fallbackIdx, 0, newFlow);
+      } else {
+        appState.flows.push(newFlow);
+      }
+
+      e.target.reset();
+      closeNewFlowModal();
+      renderFlows();
+      showToast('Nova Regra Criada!', `Gatilho "${keywords.join(', ')}" já está funcionando no chat.`, 'success');
+    }
+
+    // =========================================================================
+    // 9. RENDERIZAÇÃO & AÇÕES DA ABA 3 (CÉREBRO DA IA & CATÁLOGO)
+    // =========================================================================
+    function renderBrainAndCatalog() {
+      document.getElementById('brain-store-name').value = appState.brain.storeName;
+      document.getElementById('brain-hours').value = appState.brain.hours;
+      document.getElementById('brain-delivery').value = appState.brain.delivery;
+      document.getElementById('brain-payment').value = appState.brain.payment;
+      document.getElementById('brain-extra').value = appState.brain.extraInstructions;
+      updateToneButtonsUI();
+      renderCatalog();
+    }
+
+    function selectBrainTone(tone) {
+      appState.brain.tone = tone;
+      updateToneButtonsUI();
+    }
+
+    function updateToneButtonsUI() {
+      document.querySelectorAll('.tone-btn').forEach(btn => {
+        const isMatch = btn.dataset.tone === appState.brain.tone;
+        if (isMatch) {
+          btn.className = 'tone-btn p-2.5 rounded-xl border-2 border-brand-teal bg-brand-tealLight/60 text-brand-blue text-left transition';
+        } else {
+          btn.className = 'tone-btn p-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-left transition';
+        }
+      });
+    }
+
+    function saveBrainConfig(e) {
+      e.preventDefault();
+      appState.brain.storeName = document.getElementById('brain-store-name').value.trim();
+      appState.brain.hours = document.getElementById('brain-hours').value.trim();
+      appState.brain.delivery = document.getElementById('brain-delivery').value.trim();
+      appState.brain.payment = document.getElementById('brain-payment').value.trim();
+      appState.brain.extraInstructions = document.getElementById('brain-extra').value.trim();
+
+      showToast(
+        'Cérebro da IA Atualizado!',
+        'O Agente IA já está usando as novas regras e o tom de voz no simulador.',
+        'ai'
+      );
+    }
+
+    function renderCatalog() {
+      const container = document.getElementById('catalog-list-container');
+      const query = (document.getElementById('catalog-search-input')?.value || '').toLowerCase();
+
+      const filtered = appState.catalog.filter(item => {
+        return (
+          item.name.toLowerCase().includes(query) ||
+          item.category.toLowerCase().includes(query) ||
+          item.usage.toLowerCase().includes(query)
+        );
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">Nenhum produto encontrado para "${escapeHTML(query)}".</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="p-3.5 rounded-xl border ${item.inStock ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50 opacity-65'} flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-brand-blue/30 transition">
+          <div class="space-y-1 flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-blueLight text-brand-blue">${escapeHTML(item.category)}</span>
+              <h4 class="text-xs sm:text-sm font-bold text-slate-900">${escapeHTML(item.name)}</h4>
+              <span class="text-xs sm:text-sm font-extrabold text-brand-tealDark">${formatBRL(item.price)}</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">${escapeHTML(item.usage)}</p>
+          </div>
+
+          <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+            <button
+              onclick="toggleProductStock('${item.id}')"
+              class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition ${item.inStock ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-200 text-slate-600 border-slate-300'}"
+            >
+              ${item.inStock ? 'Em Estoque' : 'Esgotado'}
+            </button>
+            <button
+              onclick="openProductModal('${item.id}')"
+              class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-brand-blue hover:text-white text-slate-700 transition"
+            >
+              Editar
+            </button>
+            <button
+              onclick="deleteProduct('${item.id}')"
+              class="px-2 py-1.5 rounded-lg text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition"
+              title="Remover produto"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openProductModal(productId = null) {
+      const modal = document.getElementById('modal-product');
+      const title = document.getElementById('product-modal-title');
+      if (productId) {
+        const prod = appState.catalog.find(p => p.id === productId);
+        if (!prod) return;
+        title.textContent = 'Editar Produto do Catálogo';
+        document.getElementById('prod-id').value = prod.id;
+        document.getElementById('prod-name').value = prod.name;
+        document.getElementById('prod-price').value = prod.price;
+        document.getElementById('prod-category').value = prod.category;
+        document.getElementById('prod-usage').value = prod.usage;
+      } else {
+        title.textContent = 'Adicionar Produto ao Catálogo';
+        document.getElementById('prod-id').value = '';
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-category').value = 'Cozinha & Pesada';
+        document.getElementById('prod-usage').value = '';
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('modal-product').classList.add('hidden');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const category = document.getElementById('prod-category').value;
+      const usage = document.getElementById('prod-usage').value.trim();
+
+      if (id) {
+        const existing = appState.catalog.find(p => p.id === id);
+        if (existing) {
+          existing.name = name;
+          existing.price = price;
+          existing.category = category;
+          existing.usage = usage;
+        }
+        showToast('Produto Atualizado', `${name} sincronizado com a IA.`, 'success');
+      } else {
+        appState.catalog.unshift({
+          id: 'prod-' + Date.now(),
+          name,
+          price,
+          category,
+          inStock: true,
+          usage
+        });
+        showToast('Produto Adicionado', `${name} já está disponível nas recomendações da IA.`, 'success');
+      }
+
+      closeProductModal();
+      renderCatalog();
+    }
+
+    function toggleProductStock(prodId) {
+      const prod = appState.catalog.find(p => p.id === prodId);
+      if (!prod) return;
+      prod.inStock = !prod.inStock;
+      renderCatalog();
+      showToast(
+        prod.inStock ? 'Produto Disponível' : 'Produto Marcado como Esgotado',
+        `A IA ${prod.inStock ? 'voltará a recomendar' : 'não recomendará'} ${prod.name}.`,
+        'info'
+      );
+    }
+
+    function deleteProduct(prodId) {
+      appState.catalog = appState.catalog.filter(p => p.id !== prodId);
+      renderCatalog();
+      showToast('Produto Removido', 'Catálogo atualizado.', 'info');
+    }
+
+    // =========================================================================
+    // 10. RENDERIZAÇÃO DA ABA 4 (CRM & LEADS CAPTURADOS)
+    // =========================================================================
+    function renderCRM() {
+      const tbody = document.getElementById('crm-table-body');
+      const search = (document.getElementById('crm-search-input')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('crm-status-filter')?.value || 'all';
+
+      const filtered = appState.contacts.filter(c => {
+        const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
+        const matchesSearch =
+          c.name.toLowerCase().includes(search) ||
+          c.handle.toLowerCase().includes(search) ||
+          c.tags.some(t => t.toLowerCase().includes(search)) ||
+          c.interestSummary.toLowerCase().includes(search);
+        return matchesStatus && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-xs text-slate-400">Nenhum lead encontrado com os filtros atuais.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const isWA = c.channel === 'whatsapp';
+        const statusBadge =
+          c.status === 'Concluído'
+            ? 'bg-emerald-100 text-emerald-800'
+            : c.status === 'Aguardando Humano'
+            ? 'bg-amber-100 text-amber-800'
+            : 'bg-brand-tealLight text-brand-tealDark';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3.5 px-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-full bg-brand-blueLight text-brand-blue font-bold text-xs flex items-center justify-center shrink-0">
+                  ${getInitials(c.name)}
+                </div>
+                <div>
+                  <p class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHTML(c.name)}</p>
+                  <p class="text-[11px] text-slate-500">${escapeHTML(c.handle)}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 px-3">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${isWA ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-pink-50 text-pink-700 border border-pink-200'}">
+                ${isWA ? 'WhatsApp' : 'Instagram'}
+              </span>
+            </td>
+            <td class="py-3.5 px-3">
+              <div class="flex flex-wrap gap-1 max-w-[220px]">
+                ${c.tags.map(t => `<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-brand-blueLight text-brand-blue">${escapeHTML(t)}</span>`).join('')}
+              </div>
+            </td>
+            <td class="py-3.5 px-3">
+              <p class="text-xs text-slate-600 max-w-xs line-clamp-2">${escapeHTML(c.interestSummary)}</p>
+            </td>
+            <td class="py-3.5 px-3">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${statusBadge}">
+                ${escapeHTML(c.status)}
+              </span>
+            </td>
+            <td class="py-3.5 px-3 text-right">
+              <button
+                onclick="openLeadConversation('${c.id}')"
+                class="bg-brand-blue hover:bg-brand-blueDark text-white font-semibold text-xs px-3 py-1.5 rounded-xl transition shadow-2xs"
+              >
+                Abrir Conversa
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openLeadConversation(contactId) {
+      selectContact(contactId);
+      switchTab('chat');
+    }
+
+    // =========================================================================
+    // 11. INICIALIZAÇÃO DO SISTEMA
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      updateGlobalKPIs();
+      renderChatView();
+      renderFlows();
+      renderBrainAndCatalog();
+      renderCRM();
+    });
+  </script>
+</body>
+</html>

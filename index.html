@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universo da Limpeza — Catálogo Oficial &amp; Gestão | Nova Granada - SP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Barra Unificada do Ecossistema (Exclusiva para Administrador Logado) -->
+  <nav id="adminSuiteSwitcher" class="suite-switcher hidden-suite" aria-label="Módulos do Sistema Universo da Limpeza">
+    <div class="container suite-switcher-inner">
+      <div class="suite-brand">
+        <span class="suite-dot"></span>
+        <strong>Ecossistema Universo da Limpeza</strong>
+        <span id="adminSuiteUserBadge" class="suite-sub">Admin Autenticado</span>
+      </div>
+      <div class="suite-links">
+        <a href="index.html" class="suite-link active">🛒 1. Loja &amp; Gestão Caixa</a>
+        <a href="erp.html" class="suite-link">📦 2. UniGestão ERP &amp; PDV</a>
+        <a href="bi.html" class="suite-link">📊 3. Looker Studio BI</a>
+        <a href="manychat.html" class="suite-link">🤖 4. ManyChat IA &amp; CRM</a>
+        <button type="button" onclick="window.ulLogoutAdmin()" class="suite-link suite-logout">🔒 Sair Admin</button>
+      </div>
+    </div>
+  </nav>
+  <!-- Barra Institucional Superior -->
+  <div class="announcement-bar">
+    <div class="container announcement-inner">
+      <div class="announcement-left">
+        <span>📍 Rua Ricardo Piloni, nº 408 • Nova Granada - SP</span>
+        <span class="desktop-only">• Entrega rápida e retirada no balcão</span>
+      </div>
+      <div class="announcement-right">
+        <span id="status-loja" class="status-badge">Verificando expediente...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cabeçalho Principal -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="#catalogo-secao" class="brand" id="btn-logo-reset">
+        <div class="logo-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Universo da Limpeza</span>
+          <span class="brand-sub">Loja Oficial • Nova Granada - SP</span>
+        </div>
+      </a>
+
+      <div class="search-wrapper">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="search" id="input-busca" placeholder="Pesquisar por produto, categoria ou código SKU..." autocomplete="off" aria-label="Pesquisar produtos" />
+      </div>
+
+      <div class="topbar-actions">
+        <div id="user-area" class="user-area"></div>
+
+        <button id="btn-abrir-admin" class="btn-admin hidden" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+          </svg>
+          <span>Painel de Gestão</span>
+        </button>
+
+        <button id="btn-abrir-carrinho" class="btn-cart" type="button" aria-label="Abrir carrinho de compras">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Carrinho</span>
+          <span id="cart-count" class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <span class="hero-pill">Catálogo Digital Oficial • Nova Granada - SP</span>
+          <h1>Economia real em produtos de limpeza, galões 5L e utilidades</h1>
+          <p>Confira a disponibilidade em estoque em tempo real, monte seu carrinho ou kit econômico e finalize seu pedido direto com nossa equipe.</p>
+          <div class="hero-cta-row">
+            <a href="#catalogo-secao" class="btn-hero-primary">Ver Catálogo</a>
+            <button type="button" class="btn-hero-secondary" id="btn-hero-kits">🔥 Kits Econômicos</button>
+          </div>
+        </div>
+
+        <div class="hero-cards">
+          <div class="glass-stat">
+            <span class="stat-icon" aria-hidden="true">🚚</span>
+            <div>
+              <strong>Entrega em Nova Granada</strong>
+              <small>Receba em casa ou retire na Rua Ricardo Piloni, 408</small>
+            </div>
+          </div>
+          <div class="glass-stat">
+            <span class="stat-icon" aria-hidden="true">📦</span>
+            <div>
+              <strong>Estoque Atualizado</strong>
+              <small>Disponibilidade real sincronizada com a loja</small>
+            </div>
+          </div>
+          <div class="glass-stat">
+            <span class="stat-icon" aria-hidden="true">💳</span>
+            <div>
+              <strong>PIX, Cartão ou Dinheiro</strong>
+              <small>Pagamento facilitado na entrega ou retirada</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filtros e Ordenação -->
+    <section id="catalogo-secao" class="catalog-controls">
+      <div class="section-header">
+        <div>
+          <h2>Catálogo de Produtos</h2>
+          <span id="contador-produtos" class="results-count">Carregando...</span>
+        </div>
+
+        <div class="sort-box">
+          <label for="select-ordenar">Ordenar por:</label>
+          <select id="select-ordenar">
+            <option value="destaque">Relevância</option>
+            <option value="menor-preco">Menor preço</option>
+            <option value="maior-preco">Maior preço</option>
+            <option value="az">Ordem alfabética (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <nav class="categorias" id="lista-categorias" aria-label="Categorias de produtos">
+        <button type="button" class="cat-btn active" data-cat="Todos">Todos</button>
+        <button type="button" class="cat-btn" data-cat="Kits Econômicos">🔥 Kits Econômicos</button>
+        <button type="button" class="cat-btn" data-cat="Limpeza Geral">Limpeza Geral</button>
+        <button type="button" class="cat-btn" data-cat="Lavanderia">Lavanderia</button>
+        <button type="button" class="cat-btn" data-cat="Desinfetantes">Desinfetantes</button>
+        <button type="button" class="cat-btn" data-cat="Alvejantes">Alvejantes</button>
+        <button type="button" class="cat-btn" data-cat="Utilidades Domésticas">Utilidades Domésticas</button>
+      </nav>
+    </section>
+
+    <!-- Vitrine -->
+    <section id="grid-produtos" class="grid-produtos" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <strong>Universo da Limpeza</strong>
+        <p>Rua Ricardo Piloni, nº 408 — Nova Granada / SP • CEP 15442-180</p>
+        <p class="footer-hours">Expediente: Seg. a Sex. das 8h às 18h • Sáb. das 8h às 12h</p>
+      </div>
+      <div class="footer-right">
+        <span class="footer-badge">Atendimento Oficial • Nova Granada - SP</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DRAWER DO CARRINHO -->
+  <aside id="drawer-carrinho" class="drawer hidden" aria-label="Carrinho de compras">
+    <div class="drawer-header">
+      <div>
+        <h3>Seu Carrinho</h3>
+        <span class="drawer-sub">Revise quantidades e dados de entrega</span>
+      </div>
+      <button id="btn-fechar-carrinho" class="icon-close" type="button" aria-label="Fechar carrinho">&times;</button>
+    </div>
+
+    <div id="itens-carrinho" class="drawer-body"></div>
+
+    <div class="drawer-footer">
+      <div class="form-group">
+        <label for="nome-cliente">Nome completo *</label>
+        <input type="text" id="nome-cliente" placeholder="Ex: Maria Silva" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tipo-entrega">Recebimento</label>
+          <select id="tipo-entrega">
+            <option value="Entrega em domicílio">Entrega em domicílio</option>
+            <option value="Retirada na loja">Retirar na loja</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="forma-pagamento">Pagamento</label>
+          <select id="forma-pagamento">
+            <option value="PIX">PIX</option>
+            <option value="Cartão">Cartão</option>
+            <option value="Dinheiro">Dinheiro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="grupo-endereco">
+        <label for="endereco-cliente">Endereço e Bairro (Nova Granada) *</label>
+        <input type="text" id="endereco-cliente" placeholder="Rua, número e bairro" />
+      </div>
+
+      <div class="form-group hidden" id="grupo-troco">
+        <label for="troco-para">Troco para quanto? (Opcional)</label>
+        <input type="text" id="troco-para" placeholder="Ex: Nota de R$ 50,00 ou Não precisa" />
+      </div>
+
+      <label class="checkbox-teste" id="wrapper-teste-carrinho">
+        <input type="checkbox" id="pedido-modo-teste" />
+        <span>🧪 Marcar como <strong>Pedido de Teste</strong> (não contabiliza no caixa)</span>
+      </label>
+
+      <div class="summary-lines">
+        <div class="summary-line">
+          <span>Subtotal</span>
+          <span id="valor-subtotal">R$ 0,00</span>
+        </div>
+        <div class="summary-line">
+          <span>Entrega</span>
+          <span id="valor-frete" class="frete-gratis">Grátis (Nova Granada)</span>
+        </div>
+        <div class="total-box">
+          <span>Total do Pedido</span>
+          <strong id="valor-total">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <button id="btn-finalizar-whatsapp" class="btn-whatsapp" type="button">
+        Confirmar &amp; Enviar no WhatsApp
+      </button>
+    </div>
+  </aside>
+
+  <!-- MODAL DE LOGIN & CADASTRO -->
+  <div id="modal-auth" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="auth-titulo">
+    <div class="modal-card auth-card">
+      <div class="drawer-header">
+        <div>
+          <h3 id="auth-titulo">Entrar na sua conta</h3>
+          <span class="drawer-sub">Acesso para Clientes e Administração</span>
+        </div>
+        <button id="btn-fechar-auth" class="icon-close" type="button" aria-label="Fechar janela">&times;</button>
+      </div>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-tab="login">Entrar</button>
+        <button type="button" class="auth-tab" data-tab="cadastro">Criar Conta</button>
+      </div>
+
+      <form id="form-login" class="auth-form">
+        <div class="form-group">
+          <label for="login-email">E-mail</label>
+          <input type="email" id="login-email" required placeholder="seu@email.com" />
+        </div>
+        <div class="form-group">
+          <label for="login-senha">Senha</label>
+          <input type="password" id="login-senha" required placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn-primary-full">Entrar</button>
+
+        <div class="demo-credentials">
+          <p><strong>Acesso rápido:</strong></p>
+          <div class="demo-btns">
+            <button type="button" class="btn-demo" data-demo-email="admin@universolimpeza.com.br" data-demo-senha="admin123">
+              🔑 Admin — Joana (Gestão, PDV &amp; Caixa)
+            </button>
+            <button type="button" class="btn-demo" data-demo-email="cliente@email.com" data-demo-senha="123456">
+              🛍️ Cliente — Carlos Eduardo
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <form id="form-cadastro" class="auth-form hidden">
+        <div class="form-group">
+          <label for="cad-nome">Nome completo *</label>
+          <input type="text" id="cad-nome" required placeholder="Ex: Ana Paula Souza" />
+        </div>
+        <div class="form-group">
+          <label for="cad-email">E-mail *</label>
+          <input type="email" id="cad-email" required placeholder="ana@email.com" />
+        </div>
+        <div class="form-group">
+          <label for="cad-endereco">Endereço padrão em Nova Granada</label>
+          <input type="text" id="cad-endereco" placeholder="Rua, nº e Bairro (opcional)" />
+        </div>
+        <div class="form-group">
+          <label for="cad-senha">Senha *</label>
+          <input type="password" id="cad-senha" required minlength="4" placeholder="Mínimo 4 caracteres" />
+        </div>
+        <button type="submit" class="btn-primary-full">Concluir Cadastro</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MEU PERFIL & HISTÓRICO DE PEDIDOS -->
+  <div id="modal-perfil" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo">
+    <div class="modal-card profile-card">
+      <div class="drawer-header">
+        <div>
+          <h3 id="perfil-titulo">Minha Conta &amp; Pedidos</h3>
+          <span class="drawer-sub">Dados cadastrais e acompanhamento de compras</span>
+        </div>
+        <button id="btn-fechar-perfil" class="icon-close" type="button" aria-label="Fechar janela">&times;</button>
+      </div>
+
+      <div class="profile-body">
+        <form id="form-editar-perfil" class="profile-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="perf-nome">Nome completo</label>
+              <input type="text" id="perf-nome" required />
+            </div>
+            <div class="form-group">
+              <label for="perf-email">E-mail</label>
+              <input type="email" id="perf-email" disabled />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="perf-endereco">Endereço padrão de entrega</label>
+            <input type="text" id="perf-endereco" placeholder="Rua, número e bairro" />
+          </div>
+          <div class="profile-actions">
+            <button type="submit" class="btn-primary-sm">Salvar Alterações</button>
+          </div>
+        </form>
+
+        <div class="orders-section">
+          <h4>Meus Pedidos Realizados</h4>
+          <div id="lista-pedidos-usuario" class="orders-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PAINEL DE GESTÃO (EXCLUSIVO PERFIL ADMIN) -->
+  <div id="modal-admin" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-titulo">
+    <div class="modal-card admin-card">
+      <div class="drawer-header">
+        <div>
+          <h3 id="admin-titulo">Painel de Gestão — Universo da Limpeza</h3>
+          <span class="drawer-sub">Fechamento de Caixa • Pedidos • PDV Balcão • Estoque • Auditoria</span>
+        </div>
+        <button id="btn-fechar-admin" class="icon-close" type="button" aria-label="Fechar painel">&times;</button>
+      </div>
+
+      <div class="admin-kpis" id="admin-kpis"></div>
+
+      <div class="admin-subtabs" role="tablist">
+        <button type="button" class="admin-subtab active" data-admintab="caixa" role="tab" aria-selected="true">💰 Fechamento de Caixa</button>
+        <button type="button" class="admin-subtab" data-admintab="pedidos" role="tab" aria-selected="false">🧾 Pedidos &amp; Testes</button>
+        <button type="button" class="admin-subtab" data-admintab="pdv" role="tab" aria-selected="false">🖥️ PDV Balcão</button>
+        <button type="button" class="admin-subtab" data-admintab="estoque" role="tab" aria-selected="false">📦 Estoque &amp; Produtos</button>
+        <button type="button" class="admin-subtab" data-admintab="reposicao" role="tab" aria-selected="false">🚛 Reposição</button>
+        <button type="button" class="admin-subtab" data-admintab="auditoria" role="tab" aria-selected="false">🛡️ Auditoria</button>
+      </div>
+
+      <!-- ABA: FECHAMENTO DE CAIXA DIÁRIO / SEMANAL -->
+      <div id="admin-tab-caixa" class="admin-tab-panel">
+        <div class="caixa-toolbar">
+          <div class="caixa-periodo-group">
+            <label for="caixa-periodo"><strong>Período de Fechamento:</strong></label>
+            <select id="caixa-periodo">
+              <option value="hoje">📅 Fechamento do Dia (Hoje)</option>
+              <option value="semana">📆 Fechamento Semanal (Últimos 7 dias)</option>
+              <option value="tudo">🗂️ Acumulado Geral (Todos os registros)</option>
+            </select>
+          </div>
+
+          <div class="caixa-export-group">
+            <button type="button" id="btn-copiar-resumo-caixa" class="btn-outline">📋 Copiar Resumo WhatsApp</button>
+            <button type="button" id="btn-gerar-arquivo-caixa" class="btn-primary-sm">📥 Baixar Arquivo de Caixa (.CSV)</button>
+          </div>
+        </div>
+
+        <div class="caixa-grid">
+          <div class="caixa-box">
+            <h4>1. Conferência de Gaveta &amp; Sangrias</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="caixa-fundo-troco">Fundo de Troco Inicial (R$)</label>
+                <input type="number" id="caixa-fundo-troco" step="0.50" min="0" value="100.00" />
+              </div>
+              <div class="form-group">
+                <label for="caixa-sangria-valor">Registrar Sangria / Saída (R$)</label>
+                <div class="sangria-inputs">
+                  <input type="number" id="caixa-sangria-valor" step="0.50" min="0.50" placeholder="0,00" class="input-sangria-val" />
+                  <input type="text" id="caixa-sangria-motivo" placeholder="Motivo (ex: Frete)" class="input-sangria-motivo" />
+                  <button type="button" id="btn-add-sangria" class="btn-primary-sm" title="Adicionar sangria">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="caixa-resumo-financeiro" class="caixa-resumo-cards"></div>
+          </div>
+
+          <div class="caixa-box">
+            <div class="caixa-box-header">
+              <h4>2. Histórico de Fechamentos Encerrados</h4>
+              <button type="button" id="btn-encerrar-caixa" class="btn-whatsapp btn-sm-action">
+                🔒 Encerrar &amp; Salvar Caixa
+              </button>
+            </div>
+            <div id="lista-fechamentos-salvos" class="caixa-historico-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABA: PEDIDOS & GERENCIAMENTO DE TESTES -->
+      <div id="admin-tab-pedidos" class="admin-tab-panel hidden">
+        <div class="pedidos-toolbar">
+          <span class="toolbar-hint">Gerencie status, marque como <strong>Arquivo Teste</strong> ou exclua definitivamente devolvendo os itens ao estoque:</span>
+          <button type="button" id="btn-limpar-testes" class="btn-del">
+            🧹 Excluir Todos os Pedidos de Teste
+          </button>
+        </div>
+        <div id="lista-admin-pedidos" class="admin-list"></div>
+      </div>
+
+      <!-- ABA: PDV BALCÃO -->
+      <div id="admin-tab-pdv" class="admin-tab-panel hidden">
+        <div class="pdv-container">
+          <div class="pdv-controls">
+            <div class="form-group">
+              <label for="pdv-produto">Selecionar Produto ou Código SKU</label>
+              <select id="pdv-produto"></select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pdv-qtd">Quantidade</label>
+                <input type="number" id="pdv-qtd" value="1" min="1" />
+              </div>
+              <div class="form-group">
+                <label for="pdv-pagamento">Forma de Pagamento</label>
+                <select id="pdv-pagamento">
+                  <option value="PIX">PIX</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Cartão">Cartão (Débito/Crédito)</option>
+                </select>
+              </div>
+            </div>
+            <label class="checkbox-teste">
+              <input type="checkbox" id="pdv-modo-teste" />
+              <span>🧪 Registrar como <strong>Venda Teste</strong> (não contabiliza no caixa real)</span>
+            </label>
+            <button type="button" id="btn-registrar-pdv" class="btn-primary-full">
+              Registrar Venda no Balcão &amp; Baixar Estoque
+            </button>
+          </div>
+          <div class="pdv-summary-box" id="pdv-resumo-caixa"></div>
+        </div>
+      </div>
+
+      <!-- ABA: ESTOQUE -->
+      <div id="admin-tab-estoque" class="admin-tab-panel hidden">
+        <form id="form-novo-produto" class="admin-new-product">
+          <input type="text" id="novo-codigo" placeholder="SKU (ex: 00810)" required />
+          <input type="text" id="novo-nome" placeholder="Descrição do produto" required />
+          <select id="novo-categoria">
+            <option value="Limpeza Geral">Limpeza Geral</option>
+            <option value="Lavanderia">Lavanderia</option>
+            <option value="Desinfetantes">Desinfetantes</option>
+            <option value="Alvejantes">Alvejantes</option>
+            <option value="Utilidades Domésticas">Utilidades Domésticas</option>
+            <option value="Kits Econômicos">Kits Econômicos</option>
+          </select>
+          <input type="number" id="novo-preco" step="0.01" min="0.1" placeholder="Preço R$" required />
+          <input type="number" id="novo-estoque" min="0" placeholder="Qtd." required />
+          <input type="number" id="novo-minimo" min="1" placeholder="Mín." value="5" required title="Estoque Mínimo" />
+          <button type="submit" class="btn-primary-sm">+ Cadastrar</button>
+        </form>
+
+        <div class="admin-table-head">
+          <span>Produto / SKU</span>
+          <span>Preço (R$)</span>
+          <span>Estoque</span>
+          <span>Mínimo</span>
+          <span>Ação</span>
+        </div>
+
+        <div id="lista-admin" class="admin-list"></div>
+      </div>
+
+      <!-- ABA: REPOSIÇÃO -->
+      <div id="admin-tab-reposicao" class="admin-tab-panel hidden">
+        <div class="reposicao-header">
+          <p>Itens com estoque atual igual ou inferior ao mínimo configurado:</p>
+          <button type="button" class="btn-primary-sm" id="btn-copiar-reposicao">Copiar Lista de Compras</button>
+        </div>
+        <div id="lista-reposicao" class="admin-list"></div>
+      </div>
+
+      <!-- ABA: AUDITORIA -->
+      <div id="admin-tab-auditoria" class="admin-tab-panel hidden">
+        <div id="lista-auditoria" class="admin-list"></div>
+      </div>
+
+      <div class="admin-footer">
+        <div class="admin-footer-left">
+          <button id="btn-exportar-csv" class="btn-outline" type="button">📥 Exportar Estoque (CSV)</button>
+          <button id="btn-resetar-bd" class="btn-outline" type="button">Restaurar Produtos Padrão</button>
+        </div>
+        <button id="btn-salvar-admin" class="btn-primary-sm" type="button">Fechar Painel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE AÇÃO -->
+  <div id="modal-confirmacao" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-titulo">
+    <div class="modal-card confirm-card">
+      <div class="drawer-header">
+        <div>
+          <h3 id="confirm-titulo">Confirmar ação</h3>
+          <span class="drawer-sub">Verifique antes de prosseguir</span>
+        </div>
+        <button id="btn-fechar-confirm" class="icon-close" type="button" aria-label="Cancelar">&times;</button>
+      </div>
+      <div class="confirm-body">
+        <p id="confirm-mensagem"></p>
+        <div class="confirm-actions">
+          <button type="button" id="btn-confirm-cancelar" class="btn-outline">Cancelar</button>
+          <button type="button" id="btn-confirm-aceitar" class="btn-del-solid">Confirmar Exclusão</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+  <div id="overlay" class="overlay hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
